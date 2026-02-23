@@ -13,4 +13,5 @@ services:
       - IN_DOCKER=1
     privileged: true
     volumes:
+      - ./.git:/var/shork-486/.git
       - ./shork-486:/var/shork-486

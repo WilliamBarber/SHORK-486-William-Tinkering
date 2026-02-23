@@ -52,6 +52,10 @@ echo -e "${BLUE}============================${RESET}"
 
 
 
+######################################################
+## Global variables                                 ##
+######################################################
+
 # General global vars
 BUILD_TYPE="default"
 BOOTLDR_USED=""
@@ -67,7 +71,49 @@ TOTAL_DISK_SIZE=""
 USED_PARAMS=""
 USED_WM="TWM"
 
-# Process arguments
+# Branding
+NAME="$(cat ${CURR_DIR}/branding/NAME | tr -d '\n')"
+VER="$(cat ${CURR_DIR}/branding/VER | tr -d '\n')"
+ID="$(cat ${CURR_DIR}/branding/ID | tr -d '\n')"
+URL="$(cat ${CURR_DIR}/branding/URL | tr -d '\n')"
+
+# Common compiler/compiler-related locations
+PREFIX="${CURR_DIR}/build/i486-linux-musl-cross"
+AR="${PREFIX}/bin/i486-linux-musl-ar"
+CC="${PREFIX}/bin/i486-linux-musl-gcc"
+CC_STATIC="${CURR_DIR}/i486-linux-musl-gcc-static"
+CXX_STATIC="${CURR_DIR}/i486-linux-musl-gxx-static"
+DESTDIR="${CURR_DIR}/build/root"
+HOST=i486-linux-musl
+RANLIB="${PREFIX}/bin/i486-linux-musl-ranlib"
+STRIP="${PREFIX}/bin/i486-linux-musl-strip"
+SYSROOT="${PREFIX}/i486-linux-musl"
+
+# Desired versions
+BUSYBOX_VER="1_36_1"
+CURL_VER="8.18.0"
+DROPBEAR_VER="2025.89"
+FILE_VER="FILE5_46"
+GIT_VER="2.52.0"
+KERNEL_VER="6.14.11"
+LIBEVENT_VER="release-2.1.12-stable"
+MG_VER="3.7"
+NANO_VER="8.7"
+NCURSES_VER="6.4"
+NEDIT_VER="NEDIT-CLASSIC-END"
+OPENSSL_VER="3.6.0"
+ROVER_VER="1.0.1"
+STRACE_VER="6.19"
+TMUX_VER="3.6a"
+TNFTP_VER="20230507"
+TWM_VER="1.0.13.1"
+UTIL_LINUX_VER="2.41.3"
+ZLIB_VER="1.3.1.2"
+
+# MBR binary
+MBR_BIN=""
+
+# Build parameters/arguments
 ALWAYS_BUILD=false
 ENABLE_FB=true
 ENABLE_GUI=false
@@ -355,43 +401,16 @@ fi
 
 
 
-# Desired versions
-BUSYBOX_VER="1_36_1"
-CURL_VER="8.18.0"
-DROPBEAR_VER="2025.89"
-FILE_VER="FILE5_46"
-GIT_VER="2.52.0"
-KERNEL_VER="6.14.11"
-LIBEVENT_VER="release-2.1.12-stable"
-MG_VER="3.7"
-NANO_VER="8.7"
-NCURSES_VER="6.4"
-NEDIT_VER="NEDIT-CLASSIC-END"
-OPENSSL_VER="3.6.0"
-ROVER_VER="1.0.1"
-STRACE_VER="6.19"
-TMUX_VER="3.6a"
-TNFTP_VER="20230507"
-TWM_VER="1.0.13.1"
-UTIL_LINUX_VER="2.41.3"
-ZLIB_VER="1.3.1.2"
-
-# MBR binary
-MBR_BIN=""
-
-
-
-# Common compiler/compiler-related locations
-PREFIX="${CURR_DIR}/build/i486-linux-musl-cross"
-AR="${PREFIX}/bin/i486-linux-musl-ar"
-CC="${PREFIX}/bin/i486-linux-musl-gcc"
-CC_STATIC="${CURR_DIR}/i486-linux-musl-gcc-static"
-CXX_STATIC="${CURR_DIR}/i486-linux-musl-gxx-static"
-DESTDIR="${CURR_DIR}/build/root"
-HOST=i486-linux-musl
-RANLIB="${PREFIX}/bin/i486-linux-musl-ranlib"
-STRIP="${PREFIX}/bin/i486-linux-musl-strip"
-SYSROOT="${PREFIX}/i486-linux-musl"
+# Use commit ID-based versioning is VER is not numeric 
+if [[ ! "$VER" =~ [0-9] ]]; then
+    if [ -n "$IN_DOCKER" ]; then
+        git config --global --add safe.directory /var/shork-486
+    fi
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        COMMIT=$(git rev-parse --short=7 HEAD)
+        VER="$VER $COMMIT"
+    fi
+fi
 
 
 
@@ -480,12 +499,6 @@ copy_sysfile()
 
     # Copy file
     sudo cp "$SRC" "$DST"
-
-    # Read NAME, VER, ID and URL
-    NAME="$(cat ${CURR_DIR}/branding/NAME | tr -d '\n')"
-    VER="$(cat ${CURR_DIR}/branding/VER | tr -d '\n')"
-    ID="$(cat ${CURR_DIR}/branding/ID | tr -d '\n')"
-    URL="$(cat ${CURR_DIR}/branding/URL | tr -d '\n')"
 
     # Replace all placeholders with their respective values
     sudo sed -i -e "s|@NAME@|$NAME|g" -e "s|@VER@|$VER|g" -e "s|@ID@|$ID|g" -e "s|@URL@|$URL|g" "$DST"
