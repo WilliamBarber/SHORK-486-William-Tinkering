@@ -144,11 +144,11 @@ It is recommended to move or copy the images out of this directory before extens
 * **Minimal** (`--minimal`): can be used to skip building and including all non-essential features, producing a 12MiB disk image by default and a less memory-hungry SHORK 486 system.
     * This is like using the "disable networking", "disable PCMCIA", "no boot menu", "skip Dropbear", "skip file", "skip Emacs", "skip Git", "skip nano", "skip pci.ids", and "skip tnftp" parameters together.
     * Framebuffer, VESA and enhanced VGA support will be reduced and `shorkres` will not be included.
-    * The "enable GUI", "enable high memory", "enable SATA", "enable SMP", "enable USB & HID", "skip kernel", "skip BusyBox", and "use GRUB" parameters will be overridden if also used.
+    * The "enable C/C++ compiler", "enable GUI", "enable high memory", "enable SATA", "enable SMP", "enable USB & HID", "skip kernel", "skip BusyBox", and "use GRUB" parameters will be overridden if also used.
     * The minimum system memory requirement is lowered to 8-10MiB.
 
 * **Maximal** (`--maximal`): can be used to force building and including all bundled programs and features.
-    * This is like using the "enable GUI", "enable high memory", "enable SATA", "enable SMP" and "enable USB & HID" parameters together.
+    * This is like using the "enable C/C++ compiler", "enable GUI", "enable high memory", "enable SATA", "enable SMP" and "enable USB & HID" parameters together.
     * All skip bundled program/feature, "disable networking", "disable PCMCIA", "minimal", "skip kernel" and "skip BusyBox" parameters will be overridden if also used.
     * Only the "use GRUB" parameter is still available as an option.
     * The minimum system memory requirement is raised to 24MiB or 16MiB with 8MiB swap.
@@ -197,6 +197,10 @@ These parameters can be used to include, exclude (skip) or select specific bundl
 * **Disable PCMCIA** (`--disable-pcmcia`): can be used to disable kernel-level CardBus/PCMCIA/PC Card support.
     * This may slightly reduce the kernel's size and system memory usage.
     * This does nothing if the "minimal", "maximal" or "skip kernel" parameters are also used, or if networking support is enabled (to support PCMCIA network cards).
+
+* **Enable C/C++ compiler** (`--enable-cc`): can be used to include a C and C++ compiler (GCC 11.2.1 with musl).
+    * This will add ~215MiB and 2,430 files on the root file system.
+    * This does nothing if the "minimal" or "maximal" parameters are also used.
 
 * **Enable GUI** (`--enable-gui`): can be used to enable SHORK 486's graphical user interface ("SHORKGUI"). This includes kernel-level framebuffer, VESA and enhanced VGA support, TinyX display sever, TWM window manager, st terminal emulator, and `shorkgui` utility.
     * **This is an experimental feature - expect quirks and incompleteness!**

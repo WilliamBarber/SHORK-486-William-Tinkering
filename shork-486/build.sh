@@ -115,6 +115,7 @@ MBR_BIN=""
 
 # Build parameters/arguments
 ALWAYS_BUILD=false
+ENABLE_CC=false
 ENABLE_FB=true
 ENABLE_GUI=false
 ENABLE_HIGHMEM=false
@@ -160,6 +161,9 @@ while [ $# -gt 0 ]; do
         --disable-pcmcia)
             ENABLE_PCMCIA=false
             BUILD_TYPE="custom"
+            ;;
+        --enable-cc)
+            ENABLE_CC=true
             ;;
         --enable-gui)
             ENABLE_GUI=true
@@ -267,15 +271,22 @@ done
 ## Parameter overrides                              ##
 ######################################################
 
-# Override build type to "X11" if not already "custom" and the "enable X11" parameter is used
-if [[ "$BUILD_TYPE" != "custom" && "$ENABLE_GUI" == true ]]; then
-    BUILD_TYPE="GUI"
+# Overrides to ensure the correct build type if not custom but one or more of the major enable parameters are used
+if [[ "$BUILD_TYPE" != "custom" ]]; then
+    if [[ "$ENABLE_GUI" == true && "$ENABLE_CC" == true ]]; then
+        BUILD_TYPE="developer + GUI"
+    elif [[ "$ENABLE_GUI" == false && "$ENABLE_CC" == true ]]; then
+        BUILD_TYPE="developer"
+    elif [[ "$ENABLE_GUI" == true && "$ENABLE_CC" == false ]]; then
+        BUILD_TYPE="GUI"
+    fi
 fi
 
 # Overrides to ensure "maximal" parameter always takes precedence
 if $MAXIMAL; then
     echo -e "${GREEN}Configuring for a maximal build...${RESET}"
     BUILD_TYPE="maximal"
+    ENABLE_CC=true
     ENABLE_FB=true
     ENABLE_GUI=true
     ENABLE_HIGHMEM=true
@@ -300,6 +311,7 @@ if $MAXIMAL; then
 elif $MINIMAL; then
     echo -e "${GREEN}Configuring for a minimal build...${RESET}"
     BUILD_TYPE="minimal"
+    ENABLE_CC=false
     ENABLE_FB=false
     ENABLE_GUI=false
     ENABLE_HIGHMEM=false
@@ -2951,6 +2963,45 @@ get_xset()
 
 
 ######################################################
+## C compiler and toolchain building                ##
+######################################################
+
+get_musl_native()
+{
+    cd "$CURR_DIR/build"
+
+    # Skip if already extracted
+    if [ -d "${DESTDIR}/opt/i486-linux-musl-native" ]; then
+        echo -e "${LIGHT_RED}i486-linux-musl-native already extracted, skipping...${RESET}"
+        return
+    fi
+
+    echo -e "${GREEN}Downloading i486-linux-musl-native...${RESET}"
+
+    DIR="i486-linux-musl-native"
+    ARC="${DIR}.tgz"
+    URI="https://musl.cc/${ARC}"
+
+    # Download
+    [ -f $ARC ] || wget $URI
+
+    # Extract
+    if [ -d "$DESTDIR/opt/$DIR" ]; then
+        echo -e "${YELLOW}i486-linux-musl-native's archive is already present, re-extracting...${RESET}"
+        sudo rm -rf "$DESTDIR/opt/$DIR"
+    fi
+    mkdir -p $DESTDIR/opt
+    tar xzf $ARC -C $DESTDIR/opt
+    mkdir -p $DESTDIR/lib
+    ln -s /opt/i486-linux-musl-native/lib/libc.so $DESTDIR/lib/ld-musl-i386.so.1 || true
+
+    # Copy licence file
+    #cp TODO $CURR_DIR/build/LICENCES/i486-linux-musl-native.txt
+}
+
+
+
+######################################################
 ## Packaged software building                       ##
 ######################################################
 
@@ -3352,6 +3403,17 @@ trim_fat()
     echo -e "${GREEN}Trimming any possible fat...${RESET}"
 
     sudo rm -rf "${DESTDIR}/usr/lib/pkgconfig" "$DESTDIR/usr/man" "$DESTDIR/usr/share/bash-completion" "$DESTDIR/usr/share/doc" "$DESTDIR/usr/share/man"
+
+    if $ENABLE_CC; then
+        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share/man"
+        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share/locale"
+        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share/man"
+        for bin in "$DESTDIR"/opt/i486-linux-musl-native/bin/*; do
+            if [ -f "$bin" ]; then
+                sudo $STRIP $bin 2>/dev/null || true
+            fi
+        done
+    fi
 
     if ! $SKIP_EMACS; then
         sudo rm -rf "${DESTDIR}/usr/share/mg"
@@ -3867,46 +3929,15 @@ get_installed_programs_features()
         EXCLUDED_FEATURES+="\n  * shorkres"
     fi
 
-    # SHORKTUI
-    if [ -f "$DESTDIR/usr/bin/emacs" ]; then
-        INCLUDED_FEATURES+="\n  * emacs (Mg)"
+    # C/C++
+    if $ENABLE_CC; then
+        INCLUDED_FEATURES+="\n  * gcc"
+        INCLUDED_FEATURES+="\n  * g++"
+        INCLUDED_FEATURES+="\n  * musl"
     else
-        EXCLUDED_FEATURES+="\n  * emacs (Mg)"
-    fi
-    if [ -f "$DESTDIR/usr/bin/file" ]; then
-        INCLUDED_FEATURES+="\n  * file"
-    else
-        EXCLUDED_FEATURES+="\n  * file"
-    fi
-    if [ -f "$DESTDIR/usr/bin/ftp" ]; then
-        INCLUDED_FEATURES+="\n  * ftp (tnftp)"
-    else
-        EXCLUDED_FEATURES+="\n  * ftp (tnftp)"
-    fi
-    if [ -f "$DESTDIR/usr/bin/git" ]; then
-        INCLUDED_FEATURES+="\n  * git"
-    else
-        EXCLUDED_FEATURES+="\n  * git"
-    fi
-    if [ -f "$DESTDIR/usr/bin/nano" ]; then
-        INCLUDED_FEATURES+="\n  * nano"
-    else
-        EXCLUDED_FEATURES+="\n  * nano"
-    fi
-    if [ -f "$DESTDIR/usr/bin/scp" ]; then
-        INCLUDED_FEATURES+="\n  * scp (Dropbear)"
-    else
-        EXCLUDED_FEATURES+="\n  * scp (Dropbear)"
-    fi
-    if [ -f "$DESTDIR/usr/bin/ssh" ]; then
-        INCLUDED_FEATURES+="\n  * ssh (Dropbear)"
-    else
-        EXCLUDED_FEATURES+="\n  * ssh (Dropbear)"
-    fi
-    if [ -f "$DESTDIR/usr/bin/tic" ]; then
-        INCLUDED_FEATURES+="\n  * tic"
-    else
-        EXCLUDED_FEATURES+="\n  * tic"
+        EXCLUDED_FEATURES+="\n  * gcc"
+        EXCLUDED_FEATURES+="\n  * g++"
+        EXCLUDED_FEATURES+="\n  * musl"
     fi
 
     # SHORKGUI
@@ -3959,6 +3990,48 @@ get_installed_programs_features()
         INCLUDED_FEATURES+="\n  * xset"
     else
         EXCLUDED_FEATURES+="\n  * xset"
+    fi
+
+    # SHORKTUI
+    if [ -f "$DESTDIR/usr/bin/emacs" ]; then
+        INCLUDED_FEATURES+="\n  * emacs (Mg)"
+    else
+        EXCLUDED_FEATURES+="\n  * emacs (Mg)"
+    fi
+    if [ -f "$DESTDIR/usr/bin/file" ]; then
+        INCLUDED_FEATURES+="\n  * file"
+    else
+        EXCLUDED_FEATURES+="\n  * file"
+    fi
+    if [ -f "$DESTDIR/usr/bin/ftp" ]; then
+        INCLUDED_FEATURES+="\n  * ftp (tnftp)"
+    else
+        EXCLUDED_FEATURES+="\n  * ftp (tnftp)"
+    fi
+    if [ -f "$DESTDIR/usr/bin/git" ]; then
+        INCLUDED_FEATURES+="\n  * git"
+    else
+        EXCLUDED_FEATURES+="\n  * git"
+    fi
+    if [ -f "$DESTDIR/usr/bin/nano" ]; then
+        INCLUDED_FEATURES+="\n  * nano"
+    else
+        EXCLUDED_FEATURES+="\n  * nano"
+    fi
+    if [ -f "$DESTDIR/usr/bin/scp" ]; then
+        INCLUDED_FEATURES+="\n  * scp (Dropbear)"
+    else
+        EXCLUDED_FEATURES+="\n  * scp (Dropbear)"
+    fi
+    if [ -f "$DESTDIR/usr/bin/ssh" ]; then
+        INCLUDED_FEATURES+="\n  * ssh (Dropbear)"
+    else
+        EXCLUDED_FEATURES+="\n  * ssh (Dropbear)"
+    fi
+    if [ -f "$DESTDIR/usr/bin/tic" ]; then
+        INCLUDED_FEATURES+="\n  * tic"
+    else
+        EXCLUDED_FEATURES+="\n  * tic"
     fi
 }
 
@@ -4084,6 +4157,10 @@ if $ENABLE_GUI; then
     get_xli
     get_xload
     get_xset
+fi
+
+if $ENABLE_CC; then
+    get_musl_native
 fi
 
 if ! $SKIP_DROPBEAR; then

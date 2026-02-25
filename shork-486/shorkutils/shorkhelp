@@ -9,6 +9,7 @@
 
 
 
+CC_PRESENT=true
 DROPBEAR_PRESENT=true
 FILE_PRESENT=true
 EMACS_PRESENT=true
@@ -20,6 +21,9 @@ SHORKMAP_PRESENT=true
 SHORKRES_PRESENT=true
 TNFTP_PRESENT=true
 
+if [ ! -d /opt/i486-linux-musl-native ]; then
+    CC_PRESENT=false
+fi
 if [ ! -x /usr/bin/scp ]; then
     DROPBEAR_PRESENT=false
 fi
@@ -66,7 +70,7 @@ awk, basename, bc, cat, chmod, chown, chroot, cp, cut, dc, dirname, expr, file, 
 
 Editors & development tools
 ---------------------------
-ed, emacs, git, nano, vi
+ed, emacs, g++, gcc, git, nano, vi
 
 System & processes
 ------------------
@@ -76,6 +80,9 @@ Networking & remote access
 --------------------------
 ftp, ftpget, ftpput, ip, ifconfig, ping, route, scp, ssh, telnet, traceroute, udhcpc, wget, whois"
 
+    if ! $CC_PRESENT; then
+       OUTPUT=$(echo "$OUTPUT" |  sed -e "s|, g++, gcc||g")
+    fi
     if ! $DROPBEAR_PRESENT; then
        OUTPUT=$(echo "$OUTPUT" |  sed -e "s|, scp, ssh||g")
     fi
