@@ -62,7 +62,7 @@ print_commands()
 {
     OUTPUT="General
 -------
-awk, basename, cat, chmod, chown, chroot, cp, cut, dirname, expr, file, find, fold, grep, gzip, head, less, ln, loadkmap, ls, man, mkdir, mknod, mount, mv, paste, printf, pwd, readlink, rev, rm, rmdir, sed, seq, showkey, stat, sync, tar, tee, test, touch, tr, umount, unzip, whereis, which, xz
+awk, basename, bc, cat, chmod, chown, chroot, cp, cut, dc, dirname, expr, file, find, fold, grep, gzip, head, less, ln, loadkmap, ls, man, mkdir, mknod, mount, mv, paste, printf, pwd, readlink, rev, rm, rmdir, sed, seq, showkey, stat, sync, tar, tee, test, touch, tr, umount, unzip, whereis, which, xz
 
 Editors & development tools
 ---------------------------

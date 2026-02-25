@@ -129,6 +129,8 @@ IS_DEBIAN=false
 MAXIMAL=false
 MINIMAL=false
 NO_MENU=false
+PHYSICAL_ALIGN=0x2000
+PHYSICAL_START=""
 SET_KEYMAP=""
 SKIP_BB=false
 SKIP_DROPBEAR=false
@@ -198,6 +200,9 @@ while [ $# -gt 0 ]; do
         --no-menu)
             NO_MENU=true
             BUILD_TYPE="custom"
+            ;;
+        --phys-start=*)
+            PHYSICAL_START="${1#*=}"
             ;;
         --set-keymap=*)
             SET_KEYMAP="${1#*=}"
@@ -349,6 +354,20 @@ fi
 ######################################################
 ## Input validation & parameter conflict checks     ##
 ######################################################
+
+# Convert physical start MiB to hex
+if [ -n "$PHYSICAL_START" ]; then
+    if [[ "$PHYSICAL_START" != 0x* ]]; then
+        BYTES=$(echo "$PHYSICAL_START * 1048576" | bc)
+        BYTES=${BYTES%.*}
+    else
+        BYTES=$((PHYSICAL_START))
+    fi
+    CLEAN_ALIGN=${PHYSICAL_ALIGN#0x}
+    ALIGN_DEC=$((16#$CLEAN_ALIGN))
+    PHYSICAL_START=$(((BYTES + ALIGN_DEC - 1) / ALIGN_DEC * ALIGN_DEC))
+    PHYSICAL_START=$(printf "0x%X" "$PHYSICAL_START")
+fi
 
 # Target disk integer check
 if [ -n "$TARGET_DISK" ] && ! [[ "$TARGET_DISK" =~ ^[0-9]+$ ]]; then
@@ -1074,6 +1093,11 @@ configure_kernel()
     if $ENABLE_USB; then
         echo -e "${GREEN}Enabling kernel USB & HID support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.usb.frag "
+    fi
+
+    if [ -n "$PHYSICAL_START" ]; then
+        echo -e "${GREEN}Setting custom Linux kernel physical address start...${RESET}"
+        sed -i "s/CONFIG_PHYSICAL_START=0x100000/CONFIG_PHYSICAL_START=$PHYSICAL_START/" .config
     fi
     
     if [ -n "$FRAGS" ]; then
@@ -3966,6 +3990,14 @@ generate_report()
 
     lines+=(
         ""
+        "Versions:"
+        "  * SHORK 486: $VER"
+        "  * Kernel: $KERNEL_VER"
+        "  * BusyBox: $BUSYBOX_VER"
+    )
+
+    lines+=(
+        ""
         "Est. minimum RAM: ${EST_MIN_RAM}"
         "Total disk size: ${TOTAL_DISK_SIZE}MiB"
         "Root partition size: ${ROOT_PART_SIZE}MiB"
@@ -3985,12 +4017,6 @@ generate_report()
     else
         lines+=("Boot style: menu")
     fi
-
-    lines+=(
-        ""
-        "Kernel: $KERNEL_VER"
-        "BusyBox: $BUSYBOX_VER"
-    )
 
     if [ -n "$INCLUDED_FEATURES" ]; then
         lines+=(
