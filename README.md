@@ -199,10 +199,9 @@ These parameters can be used to include, exclude (skip) or select specific bundl
     * This may slightly reduce the kernel's size and system memory usage.
     * This does nothing if the "minimal", "maximal" or "skip kernel" parameters are also used, or if networking support is enabled (to support PCMCIA network cards).
 
-* **Enable GCC** (`--enable-gcc`): can be used to include GNU Assembler, GCC's C, C++ and Fortran* compiler and musl C standard library.
+* **Enable GCC** (`--enable-gcc`): can be used to include GNU Assembler, GCC's C, C++ and Fortran compiler and musl C standard library.
     * This will add ~215MiB and 2,430 files on the root file system.
     * This does nothing if the "minimal" or "maximal" parameters are also used.
-    * \* *GFortran does not presently work correctly and requires further work.*
 
 * **Enable GUI** (`--enable-gui`): can be used to enable SHORK 486's graphical user interface ("SHORKGUI"). This includes kernel-level framebuffer, VESA and enhanced VGA support, TinyX display sever, TWM window manager, st terminal emulator, and `shorkgui` utility.
     * **This is an experimental feature - expect quirks and incompleteness!**

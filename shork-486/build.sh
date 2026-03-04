@@ -124,6 +124,7 @@ ENABLE_NET=true
 ENABLE_PCMCIA=true
 ENABLE_SATA=false
 ENABLE_SMP=false
+ENABLE_TESTS=false
 ENABLE_USB=false
 FIX_EXTLINUX=false
 IS_ARCH=false
@@ -181,6 +182,9 @@ while [ $# -gt 0 ]; do
         --enable-smp)
             ENABLE_SMP=true
             BUILD_TYPE="custom"
+            ;;
+        --enable-tests)
+            ENABLE_TESTS=true
             ;;
         --enable-usb)
             ENABLE_USB=true
@@ -3123,7 +3127,11 @@ get_gcc()
     mkdir -p $DESTDIR/opt
     tar xzf $ARC -C $DESTDIR/opt
     mkdir -p $DESTDIR/lib
-    ln -s /opt/i486-linux-musl-native/lib/libc.so $DESTDIR/lib/ld-musl-i386.so.1 || true
+    for f in $DESTDIR/opt/i486-linux-musl-native/lib/*.so*; do
+        [ -e "$f" ] || continue
+        target="${f#$DESTDIR}"
+        ln -sf "$target" "$DESTDIR/lib/"
+    done
 
     # Copy licence file
     #cp TODO $CURR_DIR/build/LICENCES/i486-linux-musl-native.txt
@@ -3550,6 +3558,17 @@ find_mbr_bin()
     done
 }
 
+# Copies test files and shell scripts for testing certain SHORK 486
+# features and capabilities
+copy_tests()
+{
+    echo -e "${GREEN}Copying feature/capability tests...${RESET}"
+    mkdir -p $DESTDIR/home/tests
+    cp $CURR_DIR/tests/* $DESTDIR/home/tests
+    chmod +x $DESTDIR/home/tests/*.sh
+    cd "${DESTDIR}"
+}
+
 # Builds the root system
 build_file_system()
 {
@@ -3571,7 +3590,7 @@ build_file_system()
     chmod +x $CURR_DIR/shorkutils/shorkres
     chmod +x $CURR_DIR/shorkutils/shorkgui
 
-    echo -e "${GREEN}Copying pre-defined files...${RESET}"
+    echo -e "${GREEN}Copying system files...${RESET}"
     copy_sysfile $CURR_DIR/sysfiles/welcome-80 $DESTDIR/banners/welcome-80
     copy_sysfile $CURR_DIR/sysfiles/welcome-100 $DESTDIR/banners/welcome-100
     copy_sysfile $CURR_DIR/sysfiles/welcome-128 $DESTDIR/banners/welcome-128
@@ -3590,6 +3609,10 @@ build_file_system()
     copy_sysfile $CURR_DIR/sysfiles/passwd $DESTDIR/etc/passwd
     copy_sysfile $CURR_DIR/sysfiles/poweroff $DESTDIR/sbin/poweroff
     copy_sysfile $CURR_DIR/sysfiles/shutdown $DESTDIR/sbin/shutdown
+
+    if $ENABLE_TESTS; then
+        copy_tests
+    fi
 
     echo -e "${GREEN}Copying shorkutils...${RESET}"
     copy_sysfile $CURR_DIR/shorkutils/shorkcol $DESTDIR/usr/libexec/shorkcol
