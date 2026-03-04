@@ -152,7 +152,7 @@ It is recommended to move or copy the images out of this directory before extens
     * This is like using the "enable GCC", "enable GUI", "enable high memory", "enable SATA", "enable SMP" and "enable USB & HID" parameters together.
     * All skip bundled program/feature, "disable networking", "disable PCMCIA", "minimal", "skip kernel" and "skip BusyBox" parameters will be overridden if also used.
     * Only the "use GRUB" parameter is still available as an option.
-    * The minimum system memory requirement is raised to 24MiB or 16MiB with 8MiB swap.
+    * The minimum system memory requirement is raised to 24MiB + 8MiB swap/16MiB + 16MiB swap.
 
 * **Set keymap** (`--set-keymap`): can be used to specify SHORK 486's default keyboard layout (keymap). 
     * Example usage: `--keymap=de` to specify a German QWERTZ keyboard layout. Possible keymaps can be found in the `sysfiles/keymaps` directory (just exclude the `.kmap.bin` extension).
@@ -201,14 +201,14 @@ These parameters can be used to include, exclude (skip) or select specific bundl
 
 * **Enable GCC** (`--enable-gcc`): can be used to include GNU Assembler, GCC's C, C++ and Fortran compiler and musl C standard library.
     * This will add ~215MiB and 2,430 files on the root file system.
-    * The minimum system memory requirement is raised to 24MiB.
+    * The minimum system memory requirement is raised to 24MiB + 8MiB swap/16MiB + 16MiB swap.
     * This does nothing if the "minimal" or "maximal" parameters are also used.
 
 * **Enable GUI** (`--enable-gui`): can be used to enable SHORK 486's graphical user interface ("SHORKGUI"). This includes kernel-level framebuffer, VESA and enhanced VGA support, TinyX display sever, TWM window manager, st terminal emulator, and `shorkgui` utility.
     * **This is an experimental feature - expect quirks and incompleteness!**
     * As this feature is subject to big changes, the system requirements are not set in stone. But the following should provide a usable experience for now:
         * IntelDX4 (ideally; 486SX, 486DX, etc. works but are very slow)
-        * 24MiB system memory without swap, or 16MiB with 8MiB swap
+        * 24MiB system memory without swap, or 16MiB + 8MiB swap
         * A PCI graphics card supported by `vesafb`
     * This does nothing if the "minimal", "maximal" or "skip kernel" parameters are also used.
 
@@ -269,11 +269,11 @@ These parameters can be used to include, exclude (skip) or select specific bundl
 These parameters enable kernel-level support for features required by modern hardware. SHORK 486 is not intended to be used on such, but given some interest in using it as a minimal Linux environment on modern hardware, these are provided to help accommodate such. :)
 
 * **Enable high memory** (`--enable-highmem`): can be used to enable high memory support in the Linux kernel and declares that non-reserved physical memory starts at 16MiB instead of 1MiB. In general, this is provided in case someone wanted to try SHORK 486 on a more modern system with >875MiB RAM (it is not normally needed for any 486-era (or indeed '90s) hardware), or if reserved physical memory for any system exceeds 1MB for some reason.
-    * The minimum system memory requirement is raised to 24MiB or 16MiB with 8MiB swap.
+    * The minimum system memory requirement is raised to 24MiB/16MiB + 8MiB swap.
     * This does nothing if the "minimal" or "skip kernel" parameters are also used.
 
 * **Enable SATA** (`--enable-sata`): can be used to enable SATA AHCI support in the Linux kernel. This is provided in case someone wanted to try SHORK 486 on a more modern system with SATA devices - it is not needed for any 486-era (or indeed '90s) hardware.
-    * This may add ~5-7MiB to idle RAM usage. Whilst SHORK 486 with SATA support should still be bootable with 16MiB system memory, very little will be left for programs, thus 24MiB or 16MiB with 8MiB swap is now recommended.
+    * This may add ~5-7MiB to idle RAM usage. Whilst SHORK 486 with SATA support should still be bootable with 16MiB system memory, very little will be left for programs, thus 24MiB/16MiB + 8MiB swap is now recommended.
     * This does nothing if the "minimal" or "skip kernel" parameters are also used.
 
 * **Enable SMP** (`--enable-smp`): can be used to enable symmetric multiprocessing (e.g., multi-core) support in the Linux kernel. This is provided in case someone wanted to try SHORK 486 on a more modern system with a multi-core processor - it is not needed for any 486-era (or indeed '90s) hardware.

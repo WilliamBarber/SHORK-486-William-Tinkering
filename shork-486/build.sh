@@ -284,14 +284,14 @@ done
 # Overrides to ensure the correct build type if not custom but one or more of the major enable parameters are used
 if [[ "$BUILD_TYPE" != "custom" ]]; then
     if [[ "$ENABLE_GUI" == true && "$ENABLE_GCC" == true ]]; then
-        EST_MIN_RAM="24MiB"
+        EST_MIN_RAM="24MiB + 8MiB swap"
         BUILD_TYPE="developer + GUI"
     elif [[ "$ENABLE_GUI" == false && "$ENABLE_GCC" == true ]]; then
-        EST_MIN_RAM="24MiB"
+        EST_MIN_RAM="24MiB + 8MiB swap"
         BUILD_TYPE="developer"
     elif [[ "$ENABLE_GUI" == true && "$ENABLE_GCC" == false ]]; then
-        if [[ "$EST_MIN_RAM" != "24MiB" ]]; then
-            EST_MIN_RAM="24MiB or 16MiB + 8MiB swap"
+        if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
+            EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
         fi
         BUILD_TYPE="GUI"
     fi
@@ -310,7 +310,7 @@ if $MAXIMAL; then
     ENABLE_SATA=true
     ENABLE_SMP=true
     ENABLE_USB=true
-    EST_MIN_RAM="24MiB"
+    EST_MIN_RAM="24MiB + 8MiB swap"
     NO_MENU=false
     SKIP_BB=false
     SKIP_DROPBEAR=false
@@ -336,7 +336,7 @@ elif $MINIMAL; then
     ENABLE_SATA=false
     ENABLE_SMP=false
     ENABLE_USB=false
-    EST_MIN_RAM="10MiB or 8MiB + 2MiB swap"
+    EST_MIN_RAM="10MiB/8MiB + 2MiB swap"
     NO_MENU=true
     SKIP_BB=false
     SKIP_DROPBEAR=true
@@ -3500,9 +3500,14 @@ trim_fat()
     sudo rm -rf "${DESTDIR}/usr/lib/pkgconfig" "$DESTDIR/usr/man" "$DESTDIR/usr/share/bash-completion" "$DESTDIR/usr/share/doc" "$DESTDIR/usr/share/info" "$DESTDIR/usr/share/man"
 
     if $ENABLE_GCC; then
-        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share/man"
-        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share/locale"
+        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/i486-linux-musl"
+        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share"
         for bin in "$DESTDIR"/opt/i486-linux-musl-native/bin/*; do
+            if [ -f "$bin" ]; then
+                sudo $STRIP $bin 2>/dev/null || true
+            fi
+        done
+        for bin in "$DESTDIR"/opt/i486-linux-musl-native/libexec/gcc/i486-linux-musl/11.2.1/*; do
             if [ -f "$bin" ]; then
                 sudo $STRIP $bin 2>/dev/null || true
             fi
@@ -3947,8 +3952,8 @@ get_installed_programs_features()
         EXCLUDED_FEATURES+="\n  * kernel-level framebuffer, VESA & enhanced VGA support"
     fi
     if $ENABLE_HIGHMEM; then
-        if [[ "$EST_MIN_RAM" != "24MiB" ]]; then
-            EST_MIN_RAM="24MiB or 16MiB + 8MiB swap"
+        if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
+            EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
         fi
         INCLUDED_FEATURES+="\n  * kernel-level high memory support"
     else
@@ -3965,8 +3970,8 @@ get_installed_programs_features()
         EXCLUDED_FEATURES+="\n  * kernel-level PCMCIA support"
     fi
     if $ENABLE_SATA; then
-        if [[ "$EST_MIN_RAM" != "24MiB" ]]; then
-            EST_MIN_RAM="24MiB or 16MiB + 8MiB swap"
+        if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
+            EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
         fi
         INCLUDED_FEATURES+="\n  * kernel-level SATA support"
     else

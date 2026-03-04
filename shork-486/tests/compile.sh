@@ -31,6 +31,7 @@ if [ -x /opt/i486-linux-musl-native/bin/gcc ]; then
     gcc -static compile.c -o compile-gcc-s
     file compile-gcc-s || true
     ./compile-gcc-s || true
+    await_input
 fi
 
 if [ -x /opt/i486-linux-musl-native/bin/g++ ]; then
