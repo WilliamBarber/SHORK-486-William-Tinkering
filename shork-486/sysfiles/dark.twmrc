@@ -74,7 +74,7 @@ menu "defops"
     "Hide Tasklist"	    f.hideiconmgr
     "Force Close"		f.destroy
     "----------------"  f.nop
-    "Terminal (60x18)"  f.exec "st -g 60x18 &"
+    "Terminal (62x18)"  f.exec "st -g 62x18 &"
     "Terminal (80x24)"  f.exec "st -g 80x24 &"
     "----------------"  f.nop
     "Calculator"        f.exec "xcalc &"
