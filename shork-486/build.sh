@@ -3440,7 +3440,7 @@ get_shorkcol()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "${DESTDIR}/sbin/shorkcol" ]; then
+    if [ -f "${DESTDIR}/usr/libexec/shorkcol" ]; then
         echo -e "${LIGHT_RED}shorkcol already copied, skipping...${RESET}"
         return
     fi
@@ -3644,6 +3644,36 @@ get_shorkoff()
     chmod +x $DESTDIR/sbin/shorkoff
 }
 
+# Download and copy shorkres
+get_shorkres()
+{
+    cd "$CURR_DIR/build"
+
+    # Skip if already copied
+    if [ -f "${DESTDIR}/usr/bin/shorkres" ]; then
+        echo -e "${LIGHT_RED}shorkres already copied, skipping...${RESET}"
+        return
+    fi
+
+    # Download source
+    if [ -d shorkres ]; then
+        echo -e "${YELLOW}shorkres source already present, resetting...${RESET}"
+        cd shorkres
+        git config --global --add safe.directory "$CURR_DIR/build/shorkres"
+        git reset --hard
+        git clean -fdx
+    else
+        echo -e "${GREEN}Downloading shorkres...${RESET}"
+        git clone https://github.com/SharktasticA/shorkres.git
+        cd shorkres
+    fi
+
+    # Copy
+    echo -e "${GREEN}Copying shorkres...${RESET}"
+    cp shorkres.486 $DESTDIR/usr/bin/shorkres
+    chmod +x $DESTDIR/usr/bin/shorkres
+}
+
 
 
 # Removes anything I've seemed unnecessary in the name of space saving 
@@ -3746,7 +3776,6 @@ build_file_system()
     chmod +x $CURR_DIR/sysfiles/default.script
     chmod +x $CURR_DIR/sysfiles/poweroff
     chmod +x $CURR_DIR/sysfiles/shutdown
-    chmod +x $CURR_DIR/shorkutils/shorkres
     chmod +x $CURR_DIR/shorkutils/shorkgui
 
     echo -e "${GREEN}Copying system files...${RESET}"
@@ -3777,11 +3806,6 @@ build_file_system()
     sudo mkdir -p $DESTDIR/usr/share/terminfo/src/
     sudo cp $CURR_DIR/sysfiles/terminfo.src $DESTDIR/usr/share/terminfo/src/
     sudo tic -x -1 -o usr/share/terminfo $DESTDIR/usr/share/terminfo/src/terminfo.src
-
-    if $ENABLE_FB; then
-        echo -e "${GREEN}Installing shorkres as framebuffer, VESA and enhanced VGA support is present...${RESET}"
-        copy_sysfile $CURR_DIR/shorkutils/shorkres $DESTDIR/usr/bin/shorkres
-    fi
 
     if $ENABLE_GUI; then
         echo -e "${GREEN}Installing files needed for SHORKGUI...${RESET}"
@@ -4458,6 +4482,9 @@ if ! $SKIP_KEYMAPS; then
     get_shorkmap
 fi
 get_shorkoff
+if $ENABLE_FB; then
+    get_shorkres
+fi
 
 trim_fat
 copy_licences
