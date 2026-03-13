@@ -91,22 +91,22 @@ SYSROOT="${PREFIX}/i486-linux-musl"
 
 # Desired versions
 BUSYBOX_VER="1_36_1"
-CURL_VER="8.18.0"
+CURL_VER="8.19.0"
 DROPBEAR_VER="2025.89"
-FILE_VER="FILE5_46"
-GIT_VER="2.52.0"
+FILE_VER="FILE5_47"
+GIT_VER="2.53.0"
 KERNEL_VER="6.14.11"
 LIBEVENT_VER="release-2.1.12-stable"
 MG_VER="3.7"
 MUSL_VER="1.2.5"
-NANO_VER="8.7"
+NANO_VER="8.7.1"
 NCURSES_VER="6.4"
 NEDIT_VER="NEDIT-CLASSIC-END"
 OPENSSL_VER="3.6.0"
 ROVER_VER="1.0.1"
 STRACE_VER="6.19"
 TMUX_VER="3.6a"
-TNFTP_VER="20230507"
+TNFTP_VER="20260211"
 TWM_VER="1.0.13.1"
 UTIL_LINUX_VER="2.41.3"
 ZLIB_VER="1.3.1.2"
@@ -3463,6 +3463,7 @@ get_shorkcol()
 
     # Copy
     echo -e "${GREEN}Copying shorkcol...${RESET}"
+    mkdir -p $DESTDIR/etc
     cp shorkcol.486 $DESTDIR/usr/libexec/shorkcol
     chmod +x $DESTDIR/usr/libexec/shorkcol
     copy_sysfile $CURR_DIR/sysfiles/shorkcol.conf $DESTDIR/etc/shorkcol.conf
