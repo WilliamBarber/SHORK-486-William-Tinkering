@@ -603,7 +603,7 @@ install_debian_prerequisites()
     sudo dpkg --add-architecture i386
     sudo apt-get update
 
-    PACKAGES="autopoint bc bison bzip2 e2fsprogs fdisk flex git kpartx libtool make python3 python-is-python3 qemu-utils syslinux wget xz-utils"
+    PACKAGES="autopoint bc bison bzip2 e2fsprogs fdisk flex git kpartx libtool make pkg-config python3 python-is-python3 qemu-utils syslinux wget xz-utils"
 
     if $ENABLE_GUI; then
         PACKAGES+=" fontconfig gettext unzip xfonts-utils"
@@ -621,9 +621,6 @@ install_debian_prerequisites()
     fi
     if ! $SKIP_NANO; then
         PACKAGES+=" texinfo"
-    fi
-    if ! $SKIP_TMUX; then
-        PACKAGES+=" pkg-config"
     fi
 
     if $USE_GRUB; then
