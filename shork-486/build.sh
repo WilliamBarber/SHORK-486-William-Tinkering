@@ -3470,6 +3470,7 @@ get_shorkcol()
 
     # Copy
     echo -e "${GREEN}Copying shorkcol...${RESET}"
+    mkdir -p $DESTDIR/usr/libexec
     mkdir -p $DESTDIR/etc
     sudo cp shorkcol.486 $DESTDIR/usr/libexec/shorkcol
     sudo chmod +x $DESTDIR/usr/libexec/shorkcol
