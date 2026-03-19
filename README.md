@@ -18,7 +18,7 @@ See [GALLERY](GALLERY.md) for more photos and screenshots!
 
 ### BusyBox, util-linux, etc.
 
-ar, arch, awk, basename, bc, beep, blkid, cat, chmod, chown, chroot, clear, cp, crontab, cut, date, dc, dd, df, dirname, dmesg, du, ed, expand, expr, false, find, fold, free, ftpget, ftpput, gzip, halt, head, hostname, ifconfig, kill, less, ln, loadkmap, losetup, ls, lsblk, lspci, man, mdev, mkdir, mknod, mount, mv, nice, nohup, nproc, paste, ping, pkill, printf, pstree, pwd, readlink, rev, rm, rmdir, route, sed, seq, showkey, sleep, stat, strace, stty, swapoff, swapon, sync, tar, tee, telnet, test, top, touch, tr, traceroute, true, truncate, udhcpc, umount, uname, unexpand, unzip, usleep, vi, wc, wget, whereis, which, whoami, whois, xz, yes
+ar, arch, ascii, awk, basename, bc, beep, blkid, cal, cat, chmod, chown, chroot, clear, cp, crontab, cut, date, dc, dd, df, dirname, dmesg, du, ed, eject, expand, expr, false, find, fold, free, ftpget, ftpput, gzip, halt, head, hexdump, hostname, ifconfig, kill, killall, less, ln, loadkmap, losetup, ls, lsblk, lspci, man, mdev, mkdir, mknod, mount, mountpoint, mv, nice, nohup, nproc, paste, ping, pkill, printf, ps, pstree, pwd, readlink, rev, rm, rmdir, route, sed, seq, showkey, sleep, stat, strace, stty, swapoff, swapon, sync, tar, taskset, tee, telnet, test, top, touch, tr, traceroute, tree, true, truncate, udhcpc, umount, uname, unexpand, unzip, usleep, vi, volname, wc, wget, whereis, which, whoami, whois, xxd, xz, yes
 
 ### Bundled software
 

@@ -929,6 +929,10 @@ get_busybox()
     # Patch BusyBox to suppress banner and help message
     sed -i 's/^#if !ENABLE_FEATURE_SH_EXTRA_QUIET/#if 0 \/* disabled ash banner *\//' shell/ash.c
 
+    # Patch BusyBox's eject and volname to default to /dev/sr0 not /dev/cdrom
+    sed -i 's|"/dev/cdrom"|"/dev/sr0"|' util-linux/eject.c
+    sed -i 's|"/dev/cdrom"|"/dev/sr0"|' miscutils/volname.c
+
     echo -e "${GREEN}Copying base SHORK 486 BusyBox .config file...${RESET}"
     cp $CURR_DIR/configs/busybox.config .config
 
