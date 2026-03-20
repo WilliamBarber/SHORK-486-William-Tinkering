@@ -194,7 +194,7 @@ Selecting "Yes" here will enable networking support in SHORK 486. BusyBox will i
 
 ### Build automation
 
-These build script parameters are provided to help automate its use, especially for successive runs. It is useful if you want to rebuild SHORK 486 when the only differences are changes to sysfiles or the target disk image and swap partition sizes, and not to the kernel, selected bundled programs or features. Using some of these can lead to using stale compilations though, so it is recommended not to use the "skip BusyBox" or "skip kernel" parameters when making a build after running the build configurator or pulling any updates from the SHORK 486 GitHub repository.
+These build script parameters are provided to help automate its use, especially for successive runs. It is useful if you want to rebuild SHORK 486 when the only differences are changes to sysfiles or the target disk image and swap partition sizes, and not to the kernel, selected bundled programs or features. It is **not recommended** to use the "skip BusyBox" or "skip kernel" parameters when making a build after running the build configurator or pulling any updates from the SHORK 486 GitHub repository, as it results in using stale compilations that do not reflect configuration or repository changes.
 
 * **Always (re)build** (`--always-build`): Used to ensure the kernel is always (re)built. This will skip the prompt that appears if the kernel is already downloaded and built, acting like the user selected the "Reset & clean" option.
     * This does nothing if the "skip kernel" parameter is also used.
@@ -205,11 +205,9 @@ These build script parameters are provided to help automate its use, especially 
 
 * **Skip BusyBox** (`--skip-busybox`): Used to skip recompiling BusyBox.
     * This parameter requires at least one complete build.
-    * This does nothing if the build type is "minimal" or "maximal".
 
 * **Skip kernel** (`--skip-kernel`): Used to skip recompiling the kernel.
     * This parameter requires at least one complete build.
-    * This does nothing if the build type is "minimal" or "maximal".
 
 
 

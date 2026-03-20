@@ -319,12 +319,10 @@ if $MAXIMAL; then
     ENABLE_USB=true
     EST_MIN_RAM="24MiB + 8MiB swap"
     NO_MENU=false
-    SKIP_BB=false
     SKIP_DROPBEAR=false
     SKIP_EMACS=false
     SKIP_GIT=false
     SKIP_KEYMAPS=false
-    SKIP_KRN=false
     SKIP_FILE=false
     SKIP_NANO=false
     SKIP_PCIIDS=false
@@ -345,11 +343,9 @@ elif $MINIMAL; then
     ENABLE_USB=false
     EST_MIN_RAM="10MiB/8MiB + 2MiB swap"
     NO_MENU=true
-    SKIP_BB=false
     SKIP_DROPBEAR=true
     SKIP_EMACS=true
     SKIP_GIT=true
-    SKIP_KRN=false
     SKIP_FILE=true
     SKIP_NANO=true
     SKIP_PCIIDS=true
