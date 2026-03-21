@@ -117,6 +117,7 @@ MBR_BIN=""
 
 # Build parameters/arguments
 ALWAYS_BUILD=false
+ENABLE_CFONTS=true
 ENABLE_FB=true
 ENABLE_GCC=false
 ENABLE_GUI=false
@@ -308,6 +309,7 @@ fi
 if $MAXIMAL; then
     echo -e "${GREEN}Configuring for a maximal build...${RESET}"
     BUILD_TYPE="maximal"
+    ENABLE_CFONTS=true
     ENABLE_FB=true
     ENABLE_GCC=true
     ENABLE_GUI=true
@@ -332,6 +334,7 @@ if $MAXIMAL; then
 elif $MINIMAL; then
     echo -e "${GREEN}Configuring for a minimal build...${RESET}"
     BUILD_TYPE="minimal"
+    ENABLE_CFONTS=false
     ENABLE_FB=false
     ENABLE_GCC=false
     ENABLE_GUI=false
@@ -474,9 +477,9 @@ fi
 # Deletes build directory
 delete_root_dir()
 {
-    if [ -n "$CURR_DIR" ] && [ -d "${DESTDIR}" ]; then
+    if [ -n "$CURR_DIR" ] && [ -d $DESTDIR ]; then
         echo -e "${GREEN}Deleting existing SHORK 486 root directory to ensure fresh changes can be made...${RESET}"
-        sudo rm -rf "${DESTDIR}"
+        sudo rm -rf $DESTDIR
     fi
 }
 
@@ -556,6 +559,7 @@ copy_sysfile()
     # Replace all placeholders with their respective values
     sudo sed -i -e "s|@NAME@|$NAME|g" -e "s|@VER@|$VER|g" -e "s|@ID@|$ID|g" -e "s|@URL@|$URL|g" "$DST"
 }
+
 
 
 ######################################################
@@ -703,7 +707,7 @@ get_ncurses()
 
     # Compile and install
     echo -e "${GREEN}Compiling ncurses...${RESET}"
-    ./configure --host=${HOST} --prefix="${PREFIX}" --with-normal --without-shared --without-debug --without-cxx --enable-widec --without-termlib CC="${CC}"
+    ./configure --host=${HOST} --prefix="${PREFIX}" --with-normal --without-shared --without-debug --without-cxx --enable-widec --without-termlib --with-termlib=no --with-tinfo=no CC="${CC_STATIC}" CFLAGS="-fPIC"
     make -j$(nproc)
     make install
     ln -sf "${PREFIX}/lib/libncursesw.a" "${PREFIX}/lib/libncurses.a"
@@ -850,12 +854,12 @@ get_tic()
     cd "$CURR_DIR/build"
 
     # Check if program already compiled, skip if so
-    if [ ! -f "${DESTDIR}/usr/bin/tic" ]; then
+    if [ ! -f "$DESTDIR/usr/bin/tic" ]; then
         echo -e "${GREEN}Building tic...${RESET}"
         cd $CURR_DIR/build/ncurses/
-        ./configure --host=${HOST} --prefix=/usr --with-normal --without-shared --without-debug --without-cxx --enable-widec CC="${CC}" CFLAGS="-Os -static"
+        ./configure --host=${HOST} --prefix=/usr --with-normal --without-shared --without-debug --without-cxx --enable-widec CC="${CC_STATIC}" CFLAGS="-Os -static"
         make -C progs tic -j$(nproc)
-        sudo install -D progs/tic "${DESTDIR}/usr/bin/tic"
+        sudo install -D progs/tic "$DESTDIR/usr/bin/tic"
     else
         echo -e "${LIGHT_RED}tic already compiled, skipping...${RESET}"
     fi
@@ -979,10 +983,10 @@ get_busybox()
     make ARCH=x86 install
 
     echo -e "${GREEN}Installing BusyBox as the basis of our root file system...${RESET}"
-    if [ -d "${DESTDIR}" ]; then
-        sudo rm -r "${DESTDIR}"
+    if [ -d $DESTDIR ]; then
+        sudo rm -r $DESTDIR
     fi
-    mv _install "${DESTDIR}"
+    mv _install $DESTDIR
 
     # Copy licence file
     cp LICENSE $CURR_DIR/build/LICENCES/busybox.txt
@@ -994,7 +998,7 @@ get_strace()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/strace" ]; then
+    if [ -f "$DESTDIR/usr/bin/strace" ]; then
         echo -e "${LIGHT_RED}strace already compiled, skipping...${RESET}"
         return
     fi
@@ -1022,14 +1026,14 @@ get_strace()
     cp COPYING $CURR_DIR/build/LICENCES/strace.txt
 }
 
-# Download and compile util-linux (lsblk and whereis)
+# Download and compile util-linux (lsblk, partx, sfdisk and whereis)
 get_util_linux()
 {
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/lsblk" ] && [ -f "${DESTDIR}/usr/bin/whereis" ]; then
-        echo -e "${LIGHT_RED}lsblk and whereis from util-linux already compiled, skipping...${RESET}"
+    if [ -f "$DESTDIR/usr/bin/lsblk" ] && [ -f "$DESTDIR/usr/bin/partx" ] && [ -f "$DESTDIR/usr/sbin/sfdisk" ] && [ -f "$DESTDIR/usr/bin/whereis" ]; then
+        echo -e "${LIGHT_RED}lsblk, partx, sfdisk and whereis from util-linux already compiled, skipping...${RESET}"
         return
     fi
 
@@ -1039,6 +1043,7 @@ get_util_linux()
         cd util-linux
         git config --global --add safe.directory $CURR_DIR/build/util-linux
         git reset --hard
+        git clean -fdx
     else
         echo -e "${GREEN}Downloading util-linux...${RESET}"
         git clone --depth=1 --branch v$UTIL_LINUX_VER https://github.com/util-linux/util-linux.git
@@ -1046,19 +1051,42 @@ get_util_linux()
     fi
 
     # Compile and install
-    echo -e "${GREEN}Compiling util-linux for lsblk and whereis...${RESET}"
-    ./autogen.sh
-    ./configure --host=${HOST} --prefix=/usr --disable-all-programs --enable-lsblk --enable-whereis --enable-libblkid --enable-libmount --enable-libsmartcols --disable-shared --enable-static --without-python --without-tinfo --without-ncurses CC="${CC_STATIC}" CFLAGS="-Os -march=i486" LDFLAGS="-static"
-   
-    make lsblk whereis -j$(nproc)
-    sudo install -D -m 755 whereis "${DESTDIR}/usr/bin/whereis"
+    echo -e "${GREEN}Compiling util-linux for lsblk, partx, sfdisk and whereis...${RESET}"
 
-    for bin in lsblk whereis; do
-        sudo install -D -m 755 "${bin}" "${DESTDIR}/usr/bin/${bin}"
+    # In case "cannot find -ltinfo" error 
+    export ac_cv_search_tigetstr='-lncursesw'
+    export ac_cv_lib_tinfo_tigetstr='no'
+    export LIBS="-lncursesw"
+
+    ./autogen.sh
+    ./configure --host=${HOST} --prefix=/usr --disable-all-programs --enable-fdisks --enable-lsblk --enable-partx --enable-whereis --enable-libblkid --enable-libfdisk --enable-libmount --enable-libsmartcols --enable-libuuid --disable-shared --enable-static --without-python --without-tinfo --disable-nls CC="${CC_STATIC}" CFLAGS="-Os -march=i486 -I${PREFIX}/include" CPPFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib -static" PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig"
+
+    # In case "cannot find -ltinfo" error 
+    for mf in Makefile libfdisk/Makefile disk-utils/Makefile misc-utils/Makefile libmount/Makefile libsmartcols/Makefile libuuid/Makefile libblkid/Makefile
+    do
+        [ -f "$mf" ] || continue
+        sed -i 's/-ltinfo//g' "$mf"
+        sed -i 's/^TINFO_LIBS *=.*/TINFO_LIBS = /' "$mf"
+    done
+   
+    make TINFO_LIBS="" -j$(nproc)
+
+    for bin in lsblk partx whereis; do
+        sudo install -D -m 755 "${bin}" "$DESTDIR/usr/bin/${bin}"
+    done
+
+    for bin in sfdisk; do
+        sudo install -D -m 755 "${bin}" "$DESTDIR/usr/sbin/${bin}"
     done
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/util-linux.txt
+
+    # Fix potential linking issues with ncurses
+    unset LIBS
+    unset CFLAGS
+    unset CPPFLAGS
+    unset LDFLAGS
 }
 
 
@@ -1211,7 +1239,7 @@ get_v86d()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/sbin/v86d" ]; then
+    if [ -f "$DESTDIR/sbin/v86d" ]; then
         echo -e "${LIGHT_RED}v86d already compiled, skipping...${RESET}"
         return
     fi
@@ -1233,7 +1261,7 @@ get_v86d()
     make clean >/dev/null 2>&1
     make CC="$CC -m32 -static -no-pie" v86d
     install -Dm755 v86d "$DESTDIR/sbin/v86d"
-    $STRIP "${DESTDIR}/sbin/v86d"
+    $STRIP "$DESTDIR/sbin/v86d"
 }
 
 
@@ -1271,7 +1299,7 @@ get_xorgproto()
 
     # Compile and install
     echo -e "${GREEN}Compiling xorgproto...${RESET}"
-    ./configure --host="$HOST" --prefix=/usr --disable-shared --enable-static --enable-legacy --with-sysroot="$SYSROOT" CC="$CC_STATIC" AR="$AR" RANLIB="$RANLIB" STRIP="$STRIP"
+    ./configure --host="$HOST" --prefix=/usr --enable-legacy --with-sysroot="$SYSROOT" CC="$CC" AR="$AR" RANLIB="$RANLIB" STRIP="$STRIP"
     make -j$(nproc)
     make DESTDIR="$SYSROOT" install
 }
@@ -2553,7 +2581,7 @@ get_tinyx()
     ./autogen.sh
     ./configure --host="${HOST}" --prefix=/usr --disable-shared --enable-static --with-sysroot="$SYSROOT" --disable-xorg --enable-kdrive --enable-xfbdev CC="${CC_STATIC}" CPPFLAGS="-I$SYSROOT/usr/include -I$SYSROOT/usr/include/freetype2" CFLAGS="-Os -march=i486 -static --sysroot=$SYSROOT" LDFLAGS="-static -L$SYSROOT/usr/lib --sysroot=$SYSROOT" LIBS="$LINK_LIBS" \XSERVERCFLAGS_CFLAGS="-I$SYSROOT/usr/include -I$SYSROOT/usr/include/freetype2" XSERVERLIBS_LIBS="$LINK_LIBS"
     make -j$(nproc)
-    make DESTDIR="${DESTDIR}" install
+    make DESTDIR=$DESTDIR install
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/tinyx.txt
@@ -2757,7 +2785,7 @@ get_xcalc()
     echo -e "${GREEN}Compiling xcalc...${RESET}"
     ./configure --host="$HOST" --prefix=/usr --x-includes="$SYSROOT/usr/include" --x-libraries="$SYSROOT/usr/lib" CC="$CC_STATIC" LIBS="-lXaw7 -lXmu -lXt -lXpm -lXft -lfontconfig -lfreetype -lpng -lexpat -lXrender -lXext -lxcb -lXau -lXdmcp -lSM -lICE -lX11 -lz"
     make -j$(nproc)
-    make DESTDIR="$DESTDIR" install
+    make DESTDIR=$DESTDIR install
 }
 
 get_xclock()
@@ -2998,7 +3026,7 @@ get_dropbear()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/ssh" ]; then
+    if [ -f "$DESTDIR/usr/bin/ssh" ]; then
         echo -e "${LIGHT_RED}Dropbear already compiled, skipping...${RESET}"
         return
     fi
@@ -3020,8 +3048,8 @@ get_dropbear()
     unset LIBS
     ./configure --host=${HOST} --prefix=/usr --disable-zlib --disable-loginfunc --disable-syslog --disable-lastlog --disable-utmp --disable-utmpx --disable-wtmp --disable-wtmpx CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="-Os -march=i486 -static" LDFLAGS="-static"
     make PROGRAMS="dbclient scp" -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install PROGRAMS="dbclient scp"
-    sudo mv "${DESTDIR}/usr/bin/dbclient" "${DESTDIR}/usr/bin/ssh"
+    sudo make DESTDIR=$DESTDIR install PROGRAMS="dbclient scp"
+    sudo mv "$DESTDIR/usr/bin/dbclient" "$DESTDIR/usr/bin/ssh"
 
     # Copy licence file
     cp LICENSE $CURR_DIR/build/LICENCES/dropbear.txt
@@ -3033,7 +3061,7 @@ get_emacs()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/mg" ]; then
+    if [ -f "$DESTDIR/usr/bin/mg" ]; then
         echo -e "${LIGHT_RED}Mg already compiled, skipping...${RESET}"
         return
     fi
@@ -3062,10 +3090,10 @@ get_emacs()
     ./autogen.sh
     ./configure --host=${HOST} --prefix=/usr CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="-Os -march=i486 -static"
     make -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 
     # Allow running "emacs" to run mg
-    ln -sf mg "${DESTDIR}/usr/bin/emacs"
+    ln -sf mg "$DESTDIR/usr/bin/emacs"
 
     # Copy licence file
     cp UNLICENSE $CURR_DIR/build/LICENCES/mg.txt
@@ -3077,7 +3105,7 @@ get_file()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/file" ]; then
+    if [ -f "$DESTDIR/usr/bin/file" ]; then
         echo -e "${LIGHT_RED}file already compiled, skipping...${RESET}"
         return
     fi
@@ -3107,7 +3135,7 @@ get_file()
     autoreconf -fiv
     ./configure --host=${HOST} --prefix=/usr --disable-shared --enable-static CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="-Os -march=i486" LDFLAGS="-static"
     make -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/file.txt
@@ -3119,7 +3147,7 @@ get_gcc()
     cd "$CURR_DIR/build"
 
     # Skip if already extracted
-    if [ -d "${DESTDIR}/opt/i486-linux-musl-native" ]; then
+    if [ -d "$DESTDIR/opt/i486-linux-musl-native" ]; then
         echo -e "${LIGHT_RED}i486-linux-musl-native already extracted, skipping...${RESET}"
         return
     fi
@@ -3157,7 +3185,7 @@ get_git()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/git" ]; then
+    if [ -f "$DESTDIR/usr/bin/git" ]; then
         echo -e "${LIGHT_RED}Git already compiled, skipping...${RESET}"
         return
     fi
@@ -3180,7 +3208,7 @@ get_git()
     ./configure --host=${HOST} --prefix=/usr CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="-Os -march=i486 -static -I${PREFIX}/include" LDFLAGS="-static -L${PREFIX}/lib"
     sudo cp $CURR_DIR/configs/git.config.mak config.mak
     make -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/git.txt
@@ -3192,7 +3220,7 @@ get_musl()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/local/musl/lib/libc.so" ]; then
+    if [ -f "$DESTDIR/usr/local/musl/lib/libc.so" ]; then
         echo -e "${LIGHT_RED}musl already compile, skipping...${RESET}"
         return
     fi
@@ -3219,7 +3247,7 @@ get_musl()
     make configure
     ./configure --host=${HOST} CC=$CC_STATIC AR=$AR RANLIB=$RANLIB
     make -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 
     # Copy licence file
     cp COPYRIGHT $CURR_DIR/build/LICENCES/musl.txt
@@ -3231,7 +3259,7 @@ get_nano()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/nano" ]; then
+    if [ -f "$DESTDIR/usr/bin/nano" ]; then
         echo -e "${LIGHT_RED}nano already compiled, skipping...${RESET}"
         return
     fi
@@ -3262,14 +3290,14 @@ get_nano()
     export ac_cv_lib_tinfo_tigetstr='no'
     export LIBS="-lncursesw"
 
-    ./configure --cache-file=/dev/null --host=${HOST} --prefix=/usr --enable-utf8 --enable-color --disable-nls --disable-speller --disable-browser --disable-libmagic --disable-justify --disable-wrapping --disable-mouse CC="${CC}" CFLAGS="-Os -march=i486 -mno-fancy-math-387 -I${PREFIX}/include -I${PREFIX}/include/ncursesw" LDFLAGS="-static -L${PREFIX}/lib"
+    ./configure --cache-file=/dev/null --host=${HOST} --prefix=/usr --enable-utf8 --enable-color --disable-nls --disable-speller --disable-browser --disable-libmagic --disable-justify --disable-wrapping CC="${CC}" CFLAGS="-Os -march=i486 -mno-fancy-math-387 -I${PREFIX}/include -I${PREFIX}/include/ncursesw" LDFLAGS="-static -L${PREFIX}/lib"
 
     # In case "cannot find -ltinfo" error 
     grep -rl "\-ltinfo" . | xargs -r sed -i 's/-ltinfo//g' 2>/dev/null || true
     grep -rl "TINFO_LIBS" . | xargs -r sed -i 's/TINFO_LIBS.*/TINFO_LIBS = /' 2>/dev/null || true
 
     make TINFO_LIBS="" -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/nano.txt
@@ -3281,7 +3309,7 @@ get_rover()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/rover" ]; then
+    if [ -f "$DESTDIR/usr/bin/rover" ]; then
         echo -e "${LIGHT_RED}Rover already compiled, skipping...${RESET}"
         return
     fi
@@ -3317,7 +3345,7 @@ get_rover()
     # Compile and install
     echo -e "${GREEN}Compiling Rover...${RESET}"
     make -j$(nproc) CC="${CC_STATIC}" CFLAGS="-I${PREFIX}/include -I${PREFIX}/include/ncursesw -D_POSIX_C_SOURCE=200809L" LDFLAGS="-L${PREFIX}/lib -lncursesw -static" rover
-    sudo make PREFIX=/usr DESTDIR="${DESTDIR}" install
+    sudo make PREFIX=/usr DESTDIR=$DESTDIR install
 
     # Create "licence" file
     echo "Public domain" | sudo tee "$CURR_DIR/build/LICENCES/rover.txt" > /dev/null
@@ -3329,7 +3357,7 @@ get_tcc()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/local/bin/i386-tcc" ]; then
+    if [ -f "$DESTDIR/usr/local/bin/i386-tcc" ]; then
         echo -e "${LIGHT_RED}Tiny C Compiler already compiled, skipping...${RESET}"
         return
     fi
@@ -3356,7 +3384,7 @@ get_tcc()
     echo -e "${GREEN}Compiling Tiny C Compiler...${RESET}"
     ./configure --cpu=i386 --cc=$CC_STATIC --enable-cross --enable-static
     sudo make cross-i386 -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
     
     ln -sf /usr/local/bin/i386-tcc $DESTDIR/usr/bin/tcc || true
 
@@ -3370,7 +3398,7 @@ get_tmux()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/tmux" ]; then
+    if [ -f "$DESTDIR/usr/bin/tmux" ]; then
         echo -e "${LIGHT_RED}tmux already compiled, skipping...${RESET}"
         return
     fi
@@ -3392,7 +3420,7 @@ get_tmux()
     ./autogen.sh
     ./configure --host=${HOST} --prefix=/usr CC="${CC_STATIC}" CFLAGS="-I${PREFIX}/include -I${PREFIX}/include/ncursesw -DHAVE_FORKPTY=1" LDFLAGS="-L${PREFIX}/lib -static" LIBEVENT_CFLAGS="-I${PREFIX}/include" LIBEVENT_LIBS="-L${PREFIX}/lib -levent" CURSES_CFLAGS="-I${PREFIX}/include" CURSES_LIBS="-L${PREFIX}/lib -lncursesw" LIBS="-levent -lutil -lrt -lpthread -lm"
     make -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 
     # Copy licence file
     # TODO
@@ -3404,7 +3432,7 @@ get_tnftp()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/ftp" ]; then
+    if [ -f "$DESTDIR/usr/bin/ftp" ]; then
         echo -e "${LIGHT_RED}tnftp already compiled, skipping...${RESET}"
         return
     fi
@@ -3431,8 +3459,8 @@ get_tnftp()
     unset LIBS
     ./configure --host=${HOST} --prefix=/usr --disable-editcomplete --disable-shared --enable-static CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}" CFLAGS="-Os -march=i486" LDFLAGS=""
     make -j$(nproc)
-    sudo make DESTDIR="${DESTDIR}" install
-    ln -sf tnftp "${DESTDIR}/usr/bin/ftp"
+    sudo make DESTDIR=$DESTDIR install
+    ln -sf tnftp "$DESTDIR/usr/bin/ftp"
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/tnftp.txt
@@ -3450,7 +3478,7 @@ get_shorkcol()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "${DESTDIR}/usr/libexec/shorkcol" ]; then
+    if [ -f "$DESTDIR/usr/libexec/shorkcol" ]; then
         echo -e "${LIGHT_RED}shorkcol already copied, skipping...${RESET}"
         return
     fi
@@ -3483,7 +3511,7 @@ get_shorkcommon_sh()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "${DESTDIR}/usr/bin/shorkcommon.sh" ]; then
+    if [ -f "$DESTDIR/usr/bin/shorkcommon.sh" ]; then
         echo -e "${LIGHT_RED}shorkcommon-sh already copied, skipping...${RESET}"
         return
     fi
@@ -3512,7 +3540,7 @@ get_shorkdir()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/shorkdir" ]; then
+    if [ -f "$DESTDIR/usr/bin/shorkdir" ]; then
         echo -e "${LIGHT_RED}shorkdir already compiled, skipping...${RESET}"
         return
     fi
@@ -3533,7 +3561,7 @@ get_shorkdir()
     # Compile and install
     echo -e "${GREEN}Compiling shorkdir...${RESET}"
     make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}"
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 }
 
 # Download and compile shorkfetch
@@ -3542,7 +3570,7 @@ get_shorkfetch()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/shorkfetch" ]; then
+    if [ -f "$DESTDIR/usr/bin/shorkfetch" ]; then
         echo -e "${LIGHT_RED}shorkfetch already compiled, skipping...${RESET}"
         return
     fi
@@ -3563,7 +3591,7 @@ get_shorkfetch()
     # Compile and install
     echo -e "${GREEN}Compiling shorkfetch...${RESET}"
     make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}"
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 }
 
 # Download and compile shorkhelp
@@ -3572,7 +3600,7 @@ get_shorkhelp()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "${DESTDIR}/usr/bin/shorkhelp" ]; then
+    if [ -f "$DESTDIR/usr/bin/shorkhelp" ]; then
         echo -e "${LIGHT_RED}shorkhelp already compiled, skipping...${RESET}"
         return
     fi
@@ -3593,7 +3621,7 @@ get_shorkhelp()
     # Compile and install
     echo -e "${GREEN}Compiling shorkhelp...${RESET}"
     make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}"
-    sudo make DESTDIR="${DESTDIR}" install
+    sudo make DESTDIR=$DESTDIR install
 }
 
 # Download and copy shorkmap
@@ -3602,7 +3630,7 @@ get_shorkmap()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "${DESTDIR}/usr/bin/shorkmap" ]; then
+    if [ -f "$DESTDIR/usr/bin/shorkmap" ]; then
         echo -e "${LIGHT_RED}shorkmap already copied, skipping...${RESET}"
         return
     fi
@@ -3632,7 +3660,7 @@ get_shorkoff()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "${DESTDIR}/sbin/shorkoff" ]; then
+    if [ -f "$DESTDIR/sbin/shorkoff" ]; then
         echo -e "${LIGHT_RED}shorkoff already copied, skipping...${RESET}"
         return
     fi
@@ -3662,7 +3690,7 @@ get_shorkres()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "${DESTDIR}/usr/bin/shorkres" ]; then
+    if [ -f "$DESTDIR/usr/bin/shorkres" ]; then
         echo -e "${LIGHT_RED}shorkres already copied, skipping...${RESET}"
         return
     fi
@@ -3688,16 +3716,58 @@ get_shorkres()
 
 
 
+# Download and install console font(s)
+get_console_fonts()
+{
+    cd $CURR_DIR/build
+
+    echo -e "${GREEN}Installing console font(s)...${RESET}"
+
+    FONTS+=(
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-Fixed16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-Terminus16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-VGA16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-Fixed16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-Terminus16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-VGA16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-Fixed16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-Terminus16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-VGA16.psf"
+    )
+
+    mkdir -p $DESTDIR/usr/share/consolefonts
+    for FONT in "${FONTS[@]}"; do
+        BASE="$(basename "$FONT")"
+        DEST="$DESTDIR/usr/share/consolefonts/$BASE"
+
+        if [ -f "$DEST" ]; then
+            echo -e "${LIGHT_RED}$BASE font already installed, skipping...${RESET}"
+            continue
+        fi
+        sudo wget $FONT -O $DEST
+    done
+
+    # Download relevant licence files
+    TERMINUS_ARC="terminus-font-4.49.1.tar.gz"
+    [ -f "$TERMINUS_ARC" ] || wget https://altushost-bul.dl.sourceforge.net/project/terminus-font/terminus-font-4.49/$TERMINUS_ARC 
+    
+    tar -xzf $TERMINUS_ARC -O terminus-font-4.49.1/OFL.TXT > $CURR_DIR/build/LICENCES/Terminus.txt
+
+    cd $DESTDIR
+}
+
+
+
 # Removes anything I've seemed unnecessary in the name of space saving 
 trim_fat()
 {
     echo -e "${GREEN}Trimming any possible fat...${RESET}"
 
-    sudo rm -rf "${DESTDIR}/usr/lib/pkgconfig" "$DESTDIR/usr/man" "$DESTDIR/usr/share/bash-completion" "$DESTDIR/usr/share/doc" "$DESTDIR/usr/share/info" "$DESTDIR/usr/share/man"
+    sudo rm -rf "$DESTDIR/usr/lib/pkgconfig" "$DESTDIR/usr/man" "$DESTDIR/usr/share/bash-completion" "$DESTDIR/usr/share/doc" "$DESTDIR/usr/share/info" "$DESTDIR/usr/share/man"
 
     if $ENABLE_GCC; then
-        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/i486-linux-musl"
-        sudo rm -rf "${DESTDIR}/opt/i486-linux-musl-native/share"
+        sudo rm -rf "$DESTDIR/opt/i486-linux-musl-native/i486-linux-musl"
+        sudo rm -rf "$DESTDIR/opt/i486-linux-musl-native/share"
         for bin in "$DESTDIR"/opt/i486-linux-musl-native/bin/*; do
             if [ -f "$bin" ]; then
                 sudo $STRIP $bin 2>/dev/null || true
@@ -3710,8 +3780,12 @@ trim_fat()
         done
     fi
 
+    if $ENABLE_GUI; then
+        sudo rm -rf "$DESTDIR/home/kali"
+    fi
+
     if ! $SKIP_EMACS; then
-        sudo rm -rf "${DESTDIR}/usr/share/mg"
+        sudo rm -rf "$DESTDIR/usr/share/mg"
     fi
     
     if ! $SKIP_GIT; then
@@ -3725,9 +3799,9 @@ trim_fat()
     fi
 
     if ! $SKIP_FILE; then
-        sudo rm -rf "${DESTDIR}/usr/include/magic.h"
-        sudo rm -rf "${DESTDIR}/usr/lib/libmagic.a"
-        sudo rm -rf "${DESTDIR}/usr/lib/libmagic.la"
+        sudo rm -rf "$DESTDIR/usr/include/magic.h"
+        sudo rm -rf "$DESTDIR/usr/lib/libmagic.a"
+        sudo rm -rf "$DESTDIR/usr/lib/libmagic.la"
     fi
 
     for bin in "$DESTDIR"/usr/bin/*; do
@@ -3771,14 +3845,14 @@ copy_tests()
     mkdir -p $DESTDIR/home/tests
     cp $CURR_DIR/tests/* $DESTDIR/home/tests
     chmod +x $DESTDIR/home/tests/*.sh
-    cd "${DESTDIR}"
+    cd $DESTDIR
 }
 
 # Builds the root system
 build_file_system()
 {
     echo -e "${GREEN}Building the root system...${RESET}"
-    cd "${DESTDIR}"
+    cd $DESTDIR
 
     echo -e "${GREEN}Creating required directories...${RESET}"
     sudo mkdir -p {dev,proc,etc/init.d,sys,tmp,home,usr/share/udhcpc,usr/libexec,banners}
@@ -3817,7 +3891,7 @@ build_file_system()
     echo -e "${GREEN}Copying and compiling terminfo database...${RESET}"
     sudo mkdir -p $DESTDIR/usr/share/terminfo/src/
     sudo cp $CURR_DIR/sysfiles/terminfo.src $DESTDIR/usr/share/terminfo/src/
-    sudo tic -x -1 -o usr/share/terminfo $DESTDIR/usr/share/terminfo/src/terminfo.src
+    sudo tic -x -1 -o $DESTDIR/usr/share/terminfo $DESTDIR/usr/share/terminfo/src/terminfo.src
 
     if $ENABLE_GUI; then
         echo -e "${GREEN}Installing files needed for SHORKGUI...${RESET}"
@@ -3877,7 +3951,7 @@ build_file_system()
         copy_sysfile $CURR_DIR/sysfiles/nanorc $DESTDIR/usr/etc/nanorc
     fi
 
-    cd "${DESTDIR}"
+    cd $DESTDIR
     sudo chown -R root:root .
 }
 
@@ -4016,8 +4090,8 @@ build_disk_img()
     TOTAL_BYTES=$((KERNEL_BYTES + ROOT_BYTES + OVERHEAD_BYTES))
     TOTAL_MIB=$((TOTAL_BYTES / 1048576))
     if $MINIMAL; then
-        if [ "$TOTAL_MIB" -lt 12 ]; then
-            TOTAL_MIB=12
+        if [ "$TOTAL_MIB" -lt 16 ]; then
+            TOTAL_MIB=16
         fi
     fi
     TOTAL_DISK_SIZE=$((((TOTAL_MIB + 3) / 4) * 4))
@@ -4171,7 +4245,12 @@ get_installed_programs_features()
     fi
 
     # Misc features
-    if [ -f "$DESTDIR/usr/share/keymaps/us.kmap.bin" ]; then
+    if [ -d "$DESTDIR/usr/share/consolefonts" ]; then
+        INCLUDED_FEATURES+="\n  * alternative console fonts"
+    else
+        EXCLUDED_FEATURES+="\n  * alternative console fonts"
+    fi
+    if [ -d "$DESTDIR/usr/share/keymaps" ]; then
         INCLUDED_FEATURES+="\n  * keymaps"
     else
         EXCLUDED_FEATURES+="\n  * keymaps"
@@ -4429,6 +4508,10 @@ get_i486_musl_cc
 if ! $SKIP_BB; then
     get_busybox
 fi
+
+get_ncurses
+get_tic
+
 get_strace
 get_util_linux
 
@@ -4436,8 +4519,6 @@ if ! $SKIP_KRN; then
     get_kernel
 fi
 
-get_ncurses
-get_tic
 
 if $NEED_ZLIB; then
     get_zlib
@@ -4502,6 +4583,10 @@ fi
 get_shorkoff
 if $ENABLE_FB; then
     get_shorkres
+fi
+
+if $ENABLE_CFONTS; then
+    get_console_fonts
 fi
 
 trim_fat

@@ -45,6 +45,7 @@ SKIP_TNFTP=false
 NO_MENU=false
 ENABLE_GCC=false
 USE_GRUB=false
+ENABLE_CFONTS=true
 ENABLE_GUI=false
 ENABLE_HIGHMEM=false
 SKIP_KEYMAPS=false
@@ -124,6 +125,7 @@ SKIP_TCC=$SKIP_TCC
 SKIP_TNFTP=$SKIP_TNFTP
 NO_MENU=$NO_MENU
 USE_GRUB=$USE_GRUB
+ENABLE_CFONTS=$ENABLE_CFONTS
 ENABLE_GUI=$ENABLE_GUI
 ENABLE_HIGHMEM=$ENABLE_HIGHMEM
 SKIP_KEYMAPS=$SKIP_KEYMAPS
@@ -183,8 +185,8 @@ TYPE=$(dialog --clear \
     --cancel-label "Quit" \
     --radiolist "Select the build type, presets for SHORK 486 feature levels. All except \"Custom\" will complete configuration now." $HEIGHT $WIDTH 6 \
     "Default" "Requires 16MiB RAM + 72MiB disk"             $(val $DEFAULT) \
-    "Minimal" "Requires 8MiB RAM + 12MiB disk"              $(val $MINIMAL) \
-    "Maximal" "Requires 24MiB RAM + 480MiB disk"            $(val $MAXIMAL) \
+    "Minimal" "Requires 8MiB RAM + 16MiB disk"              $(val $MINIMAL) \
+    "Maximal" "Requires 24MiB RAM + 440MiB disk"            $(val $MAXIMAL) \
     "Custom"  "Requirements depend on subsequent choices"   $(val $CUSTOM) \
     2>&1 >/dev/tty)
 
@@ -208,6 +210,7 @@ elif [ "$TYPE" == "Default" ]; then
     ENABLE_GCC=false
     USE_GRUB=false
     ENABLE_GUI=false
+    ENABLE_CFONTS=true
     ENABLE_HIGHMEM=false
     SKIP_KEYMAPS=false
     SKIP_PCIIDS=false
@@ -243,7 +246,7 @@ while true; do
         --backtitle "SHORK 486 Build Configurator" \
         --title "Target Disk Size" \
         --cancel-label "Skip" \
-        --inputbox "Enter a target disk size in mebibytes (between 12 and 4096) to use when creating the disk image containing SHORK 486. Whilst the build script will try to honour this, if the complete build's size is larger, it will calculate a new size so the build doesn't fail." \
+        --inputbox "Enter a target disk size in mebibytes (between 16 and 4096) to use when creating the disk image containing SHORK 486. Whilst the build script will try to honour this, if the complete build's size is larger, it will calculate a new size so the build doesn't fail." \
         12 $WIDTH "$TARGET_DISK" \
         2>&1 >/dev/tty)
 
@@ -261,11 +264,11 @@ while true; do
         continue
     fi
 
-    if (( TARGET_DISK_TMP < 12 || TARGET_DISK_TMP > 4096 )); then
+    if (( TARGET_DISK_TMP < 16 || TARGET_DISK_TMP > 4096 )); then
         dialog --clear \
             --backtitle "SHORK 486 Build Configurator" \
             --title "Target Disk Size" \
-            --msgbox "The value must be between 12 and 4096." 12 $WIDTH
+            --msgbox "The value must be between 16 and 4096." 12 $WIDTH
         continue
     fi
 
@@ -433,6 +436,7 @@ OPTIONS=$(dialog --clear \
     --title "Options" \
     --cancel-label "Skip" \
     --checklist "Select what other options to include. Some of these are benign, some may increase the RAM and disk space requirement considerably, some are experimental. Options marked with \"*\" particularly affect RAM requirements." $HEIGHT $WIDTH 9 \
+    "cfonts"    "Alternative console fonts (+0.05MiB)"      $(val $ENABLE_CFONTS) \
     "grub"      "GRUB 2.x instead of EXTLINUX (+4MiB)"      $(val $USE_GRUB) \
     "gui"       "*SHORKGUI (+46MiB, EXPERIMENTAL)"          $(val $ENABLE_GUI) \
     "highmem"   "*Kernel-level high memory support"         $(val $ENABLE_HIGHMEM) \
@@ -450,7 +454,8 @@ SKIPPED=$?
 if [[ $SKIPPED -eq 1 ]]; then
     :
 else
-    if [[ $OPTIONS =~ "debug" ]];      then NO_MENU=false;         else NO_MENU=true;          fi
+    if [[ $OPTIONS =~ "cfonts" ]];     then ENABLE_CFONTS=true;     else ENABLE_CFONTS=false;  fi
+    if [[ $OPTIONS =~ "grub" ]];       then USE_GRUB=true;         else USE_GRUB=false;        fi
     if [[ $OPTIONS =~ "grub" ]];       then USE_GRUB=true;         else USE_GRUB=false;        fi
     if [[ $OPTIONS =~ "gui" ]];        then ENABLE_GUI=true;       else ENABLE_GUI=false;      fi
     if [[ $OPTIONS =~ "highmem" ]];    then ENABLE_HIGHMEM=true;   else ENABLE_HIGHMEM=false;  fi
