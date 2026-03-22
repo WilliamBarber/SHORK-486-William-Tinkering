@@ -749,7 +749,7 @@ get_ncurses()
     cp COPYING $CURR_DIR/build/LICENCES/ncurses.txt
 }
 
-# Download and compile ncurses (required for tmux)
+# Download and compile libevent (required for tmux)
 get_libevent()
 {
     cd "$CURR_DIR/build"
@@ -3529,12 +3529,11 @@ get_shorkcol()
         cd shorkcol
     fi
 
-    # Copy
-    echo -e "${GREEN}Copying shorkcol...${RESET}"
-    mkdir -p $DESTDIR/usr/libexec
+    # Compile and install
+    echo -e "${GREEN}Compiling shorkcol...${RESET}"
+    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}"
+    sudo make DESTDIR=$DESTDIR install
     mkdir -p $DESTDIR/etc
-    sudo cp shorkcol.486 $DESTDIR/usr/libexec/shorkcol
-    sudo chmod +x $DESTDIR/usr/libexec/shorkcol
     copy_sysfile $CURR_DIR/sysfiles/shorkcol.conf $DESTDIR/etc/shorkcol.conf
 }
 
