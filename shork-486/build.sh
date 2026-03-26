@@ -3630,8 +3630,8 @@ get_shorkfetch()
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkfetch...${RESET}"
-    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}"
-    sudo make DESTDIR=$DESTDIR WITH_ART=1 install
+    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}" WITH_ART=1
+    sudo make DESTDIR=$DESTDIR install
 }
 
 # Download and compile shorkfont
