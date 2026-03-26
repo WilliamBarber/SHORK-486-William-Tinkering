@@ -3050,6 +3050,52 @@ get_xset()
 
 
 ######################################################
+## Console cosmetics                                ##
+######################################################
+
+# Download and install console fonts
+get_console_fonts()
+{
+    cd $CURR_DIR/build
+
+    echo -e "${GREEN}Installing console fonts...${RESET}"
+
+    FONTS+=(
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-Fixed16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-Terminus16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-VGA16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-Fixed16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-Terminus16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-VGA16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-Fixed16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-Terminus16.psf"
+        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-VGA16.psf"
+    )
+
+    mkdir -p $DESTDIR/usr/share/consolefonts
+    for FONT in "${FONTS[@]}"; do
+        BASE="$(basename "$FONT")"
+        DEST="$DESTDIR/usr/share/consolefonts/$BASE"
+
+        if [ -f "$DEST" ]; then
+            echo -e "${LIGHT_RED}$BASE font already installed, skipping...${RESET}"
+            continue
+        fi
+        sudo wget $FONT -O $DEST
+    done
+
+    # Download relevant licence files
+    TERMINUS_ARC="terminus-font-4.49.1.tar.gz"
+    [ -f "$TERMINUS_ARC" ] || wget https://altushost-bul.dl.sourceforge.net/project/terminus-font/terminus-font-4.49/$TERMINUS_ARC 
+    
+    tar -xzf $TERMINUS_ARC -O terminus-font-4.49.1/OFL.TXT > $CURR_DIR/build/LICENCES/Terminus.txt
+
+    cd $DESTDIR
+}
+
+
+
+######################################################
 ## Packaged software building                       ##
 ######################################################
 
@@ -3516,18 +3562,16 @@ get_shorkcommon_sh()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkcommon-sh ]; then
-        echo -e "${YELLOW}shorkcommon-sh source already present, resetting...${RESET}"
-        cd shorkcommon-sh
-        git config --global --add safe.directory "$CURR_DIR/build/shorkcommon-sh"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkcommon-sh...${RESET}"
-        git clone https://github.com/SharktasticA/shorkcommon-sh.git
-        cd shorkcommon-sh
+        echo -e "${YELLOW}shorkcommon-sh source already present, recloning...${RESET}"
+        sudo rm -r shorkcommon-sh
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkcommon-sh...${RESET}"
+    git clone https://github.com/SharktasticA/shorkcommon-sh.git
+    cd shorkcommon-sh
 
     # Copy
     echo -e "${GREEN}Copying shorkcommon-sh...${RESET}"
@@ -3545,18 +3589,16 @@ get_shorkdir()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkdir ]; then
-        echo -e "${YELLOW}shorkdir source already present, resetting...${RESET}"
-        cd shorkdir
-        git config --global --add safe.directory "$CURR_DIR/build/shorkdir"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkdir...${RESET}"
-        git clone https://github.com/SharktasticA/shorkdir.git
-        cd shorkdir
+        echo -e "${YELLOW}shorkdir source already present, recloning...${RESET}"
+        sudo rm -r shorkdir
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkdir...${RESET}"
+    git clone https://github.com/SharktasticA/shorkdir.git
+    cd shorkdir
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkdir...${RESET}"
@@ -3575,18 +3617,16 @@ get_shorkfetch()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkfetch ]; then
-        echo -e "${YELLOW}shorkfetch source already present, resetting...${RESET}"
-        cd shorkfetch
-        git config --global --add safe.directory "$CURR_DIR/build/shorkfetch"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkfetch...${RESET}"
-        git clone https://github.com/SharktasticA/shorkfetch.git
-        cd shorkfetch
+        echo -e "${YELLOW}shorkfetch source already present, recloning...${RESET}"
+        sudo rm -r shorkfetch
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkfetch...${RESET}"
+    git clone https://github.com/SharktasticA/shorkfetch.git
+    cd shorkfetch
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkfetch...${RESET}"
@@ -3605,18 +3645,16 @@ get_shorkfont()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkfont ]; then
-        echo -e "${YELLOW}shorkfont source already present, resetting...${RESET}"
-        cd shorkfont
-        git config --global --add safe.directory "$CURR_DIR/build/shorkfont"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkfont...${RESET}"
-        git clone https://github.com/SharktasticA/shorkfont.git
-        cd shorkfont
+        echo -e "${YELLOW}shorkfont source already present, recloning...${RESET}"
+        sudo rm -r shorkfont
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkfont...${RESET}"
+    git clone https://github.com/SharktasticA/shorkfont.git
+    cd shorkfont
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkfont...${RESET}"
@@ -3637,18 +3675,16 @@ get_shorkhelp()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkhelp ]; then
-        echo -e "${YELLOW}shorkhelp source already present, resetting...${RESET}"
-        cd shorkhelp
-        git config --global --add safe.directory "$CURR_DIR/build/shorkhelp"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkhelp...${RESET}"
-        git clone https://github.com/SharktasticA/shorkhelp.git
-        cd shorkhelp
+        echo -e "${YELLOW}shorkhelp source already present, recloning...${RESET}"
+        sudo rm -r shorkhelp
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkhelp...${RESET}"
+    git clone https://github.com/SharktasticA/shorkhelp.git
+    cd shorkhelp
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkhelp...${RESET}"
@@ -3667,18 +3703,16 @@ get_shorkmap()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkmap ]; then
-        echo -e "${YELLOW}shorkmap source already present, resetting...${RESET}"
-        cd shorkmap
-        git config --global --add safe.directory "$CURR_DIR/build/shorkmap"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkmap...${RESET}"
-        git clone https://github.com/SharktasticA/shorkmap.git
-        cd shorkmap
+        echo -e "${YELLOW}shorkmap source already present, recloning...${RESET}"
+        sudo rm -r shorkmap
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkmap...${RESET}"
+    git clone https://github.com/SharktasticA/shorkmap.git
+    cd shorkmap
 
     # Copy
     echo -e "${GREEN}Copying shorkmap...${RESET}"
@@ -3697,18 +3731,16 @@ get_shorkoff()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkoff ]; then
-        echo -e "${YELLOW}shorkoff source already present, resetting...${RESET}"
-        cd shorkoff
-        git config --global --add safe.directory "$CURR_DIR/build/shorkoff"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkoff...${RESET}"
-        git clone https://github.com/SharktasticA/shorkoff.git
-        cd shorkoff
+        echo -e "${YELLOW}shorkoff source already present, recloning...${RESET}"
+        sudo rm -r shorkoff
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkoff...${RESET}"
+    git clone https://github.com/SharktasticA/shorkoff.git
+    cd shorkoff
 
     # Copy
     echo -e "${GREEN}Copying shorkoff...${RESET}"
@@ -3727,65 +3759,21 @@ get_shorkres()
         return
     fi
 
-    # Download source
+    # Delete if present
     if [ -d shorkres ]; then
-        echo -e "${YELLOW}shorkres source already present, resetting...${RESET}"
-        cd shorkres
-        git config --global --add safe.directory "$CURR_DIR/build/shorkres"
-        git reset --hard
-        git clean -fdx
-    else
-        echo -e "${GREEN}Downloading shorkres...${RESET}"
-        git clone https://github.com/SharktasticA/shorkres.git
-        cd shorkres
+        echo -e "${YELLOW}shorkres source already present, recloning...${RESET}"
+        sudo rm -r shorkres
     fi
+
+    # Download source
+    echo -e "${GREEN}Downloading shorkres...${RESET}"
+    git clone https://github.com/SharktasticA/shorkres.git
+    cd shorkres
 
     # Copy
     echo -e "${GREEN}Copying shorkres...${RESET}"
     cp shorkres.486 $DESTDIR/usr/bin/shorkres
     chmod +x $DESTDIR/usr/bin/shorkres
-}
-
-
-
-# Download and install console font(s)
-get_console_fonts()
-{
-    cd $CURR_DIR/build
-
-    echo -e "${GREEN}Installing console font(s)...${RESET}"
-
-    FONTS+=(
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-Fixed16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-Terminus16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat2-VGA16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-Fixed16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-Terminus16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat7-VGA16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-Fixed16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-Terminus16.psf"
-        "https://www.zap.org.au/projects/console-fonts-distributed/psftx-debian-13.4/Lat15-VGA16.psf"
-    )
-
-    mkdir -p $DESTDIR/usr/share/consolefonts
-    for FONT in "${FONTS[@]}"; do
-        BASE="$(basename "$FONT")"
-        DEST="$DESTDIR/usr/share/consolefonts/$BASE"
-
-        if [ -f "$DEST" ]; then
-            echo -e "${LIGHT_RED}$BASE font already installed, skipping...${RESET}"
-            continue
-        fi
-        sudo wget $FONT -O $DEST
-    done
-
-    # Download relevant licence files
-    TERMINUS_ARC="terminus-font-4.49.1.tar.gz"
-    [ -f "$TERMINUS_ARC" ] || wget https://altushost-bul.dl.sourceforge.net/project/terminus-font/terminus-font-4.49/$TERMINUS_ARC 
-    
-    tar -xzf $TERMINUS_ARC -O terminus-font-4.49.1/OFL.TXT > $CURR_DIR/build/LICENCES/Terminus.txt
-
-    cd $DESTDIR
 }
 
 
@@ -4582,6 +4570,10 @@ if $ENABLE_GUI; then
     get_xset
 fi
 
+if $ENABLE_CFONTS; then
+    get_console_fonts
+fi
+
 if ! $SKIP_DROPBEAR; then
     get_dropbear
 fi
@@ -4619,10 +4611,6 @@ fi
 get_shorkoff
 if $ENABLE_FB; then
     get_shorkres
-fi
-
-if $ENABLE_CFONTS; then
-    get_console_fonts
 fi
 
 trim_fat
