@@ -3630,7 +3630,7 @@ get_shorkfetch()
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkfetch...${RESET}"
-    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}" WITH_ART=1
+    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}" WITH_ART=1 WITH_COL=BOLD_CYAN
     sudo make DESTDIR=$DESTDIR install
 }
 
