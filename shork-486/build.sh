@@ -3602,7 +3602,7 @@ get_shorkdir()
 
     # Compile and install
     echo -e "${GREEN}Compiling shorkdir...${RESET}"
-    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}"
+    make -j$(nproc) CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}" STRIP="${STRIP}" WITH_COL=1
     sudo make DESTDIR=$DESTDIR install
 }
 
