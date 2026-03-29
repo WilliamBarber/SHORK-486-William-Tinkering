@@ -77,6 +77,7 @@ NAME="$(cat ${CURR_DIR}/branding/NAME | tr -d '\n')"
 VER="$(cat ${CURR_DIR}/branding/VER | tr -d '\n')"
 ID="$(cat ${CURR_DIR}/branding/ID | tr -d '\n')"
 URL="$(cat ${CURR_DIR}/branding/URL | tr -d '\n')"
+HOSTNAME="$ID"
 
 # Common compiler/compiler-related locations
 PREFIX="${CURR_DIR}/build/i486-linux-musl-cross"
@@ -155,7 +156,7 @@ TARGET_SWAP=""
 USE_GRUB=false
 
 while [ $# -gt 0 ]; do
-    USED_PARAMS+="\n  $1"
+    USED_PARAMS+="\n $1"
     case "$1" in
         --always-build)
             ALWAYS_BUILD=true
@@ -550,7 +551,7 @@ copy_config()
     sudo sed -i -e "s|@CC@|$CC|g" -e "s|@CC_STATIC@|$CC_STATIC|g" -e "s|@AR@|$AR|g" -e "s|@STRIP@|$STRIP|g" "$DST"
 }
 
-# Copies a sysfile to a destination and makes sure any @NAME@ @VER@, @ID@
+# Copies a sysfile to a destination and makes sure any @NAME@ @VER@, @ID@, @HOSTNAME@
 # or @URL@ placeholders are replaced
 copy_sysfile()
 {
@@ -565,7 +566,7 @@ copy_sysfile()
     sudo cp "$SRC" "$DST"
 
     # Replace all placeholders with their respective values
-    sudo sed -i -e "s|@NAME@|$NAME|g" -e "s|@VER@|$VER|g" -e "s|@ID@|$ID|g" -e "s|@URL@|$URL|g" "$DST"
+    sudo sed -i -e "s|@NAME@|$NAME|g" -e "s|@VER@|$VER|g" -e "s|@ID@|$ID|g" -e "s|@HOSTNAME@|$HOSTNAME|g" -e "s|@URL@|$URL|g" "$DST"
 }
 
 
@@ -4217,224 +4218,224 @@ get_installed_programs_features()
 {
     # Kernel features
     if $ENABLE_GUI; then
-        INCLUDED_FEATURES+="\n  * kernel-level event interface support"
+        INCLUDED_FEATURES+="\n * kernel-level event interface support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level event interface support"
+        EXCLUDED_FEATURES+="\n * kernel-level event interface support"
     fi
     if $ENABLE_FB; then
-        INCLUDED_FEATURES+="\n  * kernel-level framebuffer, VESA & enhanced VGA support"
+        INCLUDED_FEATURES+="\n * kernel-level framebuffer, VESA & enhanced VGA support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level framebuffer, VESA & enhanced VGA support"
+        EXCLUDED_FEATURES+="\n * kernel-level framebuffer, VESA & enhanced VGA support"
     fi
     if $ENABLE_HIGHMEM; then
         if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
             EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
         fi
-        INCLUDED_FEATURES+="\n  * kernel-level high memory support"
+        INCLUDED_FEATURES+="\n * kernel-level high memory support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level high memory support"
+        EXCLUDED_FEATURES+="\n * kernel-level high memory support"
     fi
     if $ENABLE_NET; then
-        INCLUDED_FEATURES+="\n  * kernel-level networking support"
+        INCLUDED_FEATURES+="\n * kernel-level networking support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level networking support"
+        EXCLUDED_FEATURES+="\n * kernel-level networking support"
     fi
     if $ENABLE_PCMCIA; then
-        INCLUDED_FEATURES+="\n  * kernel-level PCMCIA support"
+        INCLUDED_FEATURES+="\n * kernel-level PCMCIA support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level PCMCIA support"
+        EXCLUDED_FEATURES+="\n * kernel-level PCMCIA support"
     fi
     if $ENABLE_SATA; then
         if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
             EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
         fi
-        INCLUDED_FEATURES+="\n  * kernel-level SATA support"
+        INCLUDED_FEATURES+="\n * kernel-level SATA support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level SATA support"
+        EXCLUDED_FEATURES+="\n * kernel-level SATA support"
     fi
     if $ENABLE_SMP; then
-        INCLUDED_FEATURES+="\n  * kernel-level SMP support"
+        INCLUDED_FEATURES+="\n * kernel-level SMP support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level SMP support"
+        EXCLUDED_FEATURES+="\n * kernel-level SMP support"
     fi
     if [ -n "$TARGET_SWAP" ]; then
-        INCLUDED_FEATURES+="\n  * kernel-level swap support"
+        INCLUDED_FEATURES+="\n * kernel-level swap support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level swap support"
+        EXCLUDED_FEATURES+="\n * kernel-level swap support"
     fi
     if $ENABLE_USB; then
-        INCLUDED_FEATURES+="\n  * kernel-level USB & HID support"
+        INCLUDED_FEATURES+="\n * kernel-level USB & HID support"
     else
-        EXCLUDED_FEATURES+="\n  * kernel-level USB & HID support"
+        EXCLUDED_FEATURES+="\n * kernel-level USB & HID support"
     fi
 
     # Misc features
     if [ -d "$DESTDIR/usr/share/consolefonts" ]; then
-        INCLUDED_FEATURES+="\n  * alternative console fonts"
+        INCLUDED_FEATURES+="\n * alternative console fonts"
     else
-        EXCLUDED_FEATURES+="\n  * alternative console fonts"
+        EXCLUDED_FEATURES+="\n * alternative console fonts"
     fi
     if [ -d "$DESTDIR/usr/share/keymaps" ]; then
-        INCLUDED_FEATURES+="\n  * keymaps"
+        INCLUDED_FEATURES+="\n * keymaps"
     else
-        EXCLUDED_FEATURES+="\n  * keymaps"
+        EXCLUDED_FEATURES+="\n * keymaps"
     fi
     if [ -f "$DESTDIR/usr/share/misc/pci.ids" ]; then
-        INCLUDED_FEATURES+="\n  * pci.ids database"
+        INCLUDED_FEATURES+="\n * pci.ids database"
     else
-        EXCLUDED_FEATURES+="\n  * pci.ids database"
+        EXCLUDED_FEATURES+="\n * pci.ids database"
     fi
 
     # SHORK Utilities
     if [ -f "$DESTDIR/usr/bin/shorkdir" ]; then
-        INCLUDED_FEATURES+="\n  * shorkdir"
+        INCLUDED_FEATURES+="\n * shorkdir"
     else
-        EXCLUDED_FEATURES+="\n  * shorkdir"
+        EXCLUDED_FEATURES+="\n * shorkdir"
     fi
     if [ -f "$DESTDIR/usr/bin/shorkfetch" ]; then
-        INCLUDED_FEATURES+="\n  * shorkfetch"
+        INCLUDED_FEATURES+="\n * shorkfetch"
     else
-        EXCLUDED_FEATURES+="\n  * shorkfetch"
+        EXCLUDED_FEATURES+="\n * shorkfetch"
     fi
     if [ -f "$DESTDIR/usr/libexec/shorkfont" ]; then
-        INCLUDED_FEATURES+="\n  * shorkfont"
+        INCLUDED_FEATURES+="\n * shorkfont"
     else
-        EXCLUDED_FEATURES+="\n  * shorkfont"
+        EXCLUDED_FEATURES+="\n * shorkfont"
     fi
     if [ -f "$DESTDIR/usr/bin/shorkgui" ]; then
-        INCLUDED_FEATURES+="\n  * shorkgui"
+        INCLUDED_FEATURES+="\n * shorkgui"
     else
-        EXCLUDED_FEATURES+="\n  * shorkgui"
+        EXCLUDED_FEATURES+="\n * shorkgui"
     fi
     if [ -f "$DESTDIR/usr/bin/shorkhelp" ]; then
-        INCLUDED_FEATURES+="\n  * shorkhelp"
+        INCLUDED_FEATURES+="\n * shorkhelp"
     else
-        EXCLUDED_FEATURES+="\n  * shorkhelp"
+        EXCLUDED_FEATURES+="\n * shorkhelp"
     fi
     if [ -f "$DESTDIR/usr/bin/shorkmap" ]; then
-        INCLUDED_FEATURES+="\n  * shorkmap"
+        INCLUDED_FEATURES+="\n * shorkmap"
     else
-        EXCLUDED_FEATURES+="\n  * shorkmap"
+        EXCLUDED_FEATURES+="\n * shorkmap"
     fi
     if [ -f "$DESTDIR/sbin/shorkoff" ]; then
-        INCLUDED_FEATURES+="\n  * shorkoff"
+        INCLUDED_FEATURES+="\n * shorkoff"
     else
-        EXCLUDED_FEATURES+="\n  * shorkoff"
+        EXCLUDED_FEATURES+="\n * shorkoff"
     fi
     if [ -f "$DESTDIR/usr/bin/shorkres" ]; then
-        INCLUDED_FEATURES+="\n  * shorkres"
+        INCLUDED_FEATURES+="\n * shorkres"
     else
-        EXCLUDED_FEATURES+="\n  * shorkres"
+        EXCLUDED_FEATURES+="\n * shorkres"
     fi
 
     # SHORKGUI
     if [ -f "$DESTDIR/usr/bin/oneko" ]; then
-        INCLUDED_FEATURES+="\n  * oneko"
+        INCLUDED_FEATURES+="\n * oneko"
     else
-        EXCLUDED_FEATURES+="\n  * oneko"
+        EXCLUDED_FEATURES+="\n * oneko"
     fi
     if [ -f "$DESTDIR/usr/bin/st" ]; then
-        INCLUDED_FEATURES+="\n  * st"
+        INCLUDED_FEATURES+="\n * st"
     else
-        EXCLUDED_FEATURES+="\n  * st"
+        EXCLUDED_FEATURES+="\n * st"
     fi
     if [ -f "$DESTDIR/usr/bin/twm" ]; then
-        INCLUDED_FEATURES+="\n  * twm"
+        INCLUDED_FEATURES+="\n * twm"
     else
-        EXCLUDED_FEATURES+="\n  * twm"
+        EXCLUDED_FEATURES+="\n * twm"
     fi
     if [ -f "$DESTDIR/usr/bin/xcalc" ]; then
-        INCLUDED_FEATURES+="\n  * xcalc"
+        INCLUDED_FEATURES+="\n * xcalc"
     else
-        EXCLUDED_FEATURES+="\n  * xcalc"
+        EXCLUDED_FEATURES+="\n * xcalc"
     fi
     if [ -f "$DESTDIR/usr/bin/xclock" ]; then
-        INCLUDED_FEATURES+="\n  * xclock"
+        INCLUDED_FEATURES+="\n * xclock"
     else
-        EXCLUDED_FEATURES+="\n  * xclock"
+        EXCLUDED_FEATURES+="\n * xclock"
     fi
     if [ -f "$DESTDIR/usr/bin/xeyes" ]; then
-        INCLUDED_FEATURES+="\n  * xeyes"
+        INCLUDED_FEATURES+="\n * xeyes"
     else
-        EXCLUDED_FEATURES+="\n  * xeyes"
+        EXCLUDED_FEATURES+="\n * xeyes"
     fi
     if [ -f "$DESTDIR/usr/bin/xli" ]; then
-        INCLUDED_FEATURES+="\n  * xli"
+        INCLUDED_FEATURES+="\n * xli"
     else
-        EXCLUDED_FEATURES+="\n  * xli"
+        EXCLUDED_FEATURES+="\n * xli"
     fi
     if [ -f "$DESTDIR/usr/bin/xload" ]; then
-        INCLUDED_FEATURES+="\n  * xload"
+        INCLUDED_FEATURES+="\n * xload"
     else
-        EXCLUDED_FEATURES+="\n  * xload"
+        EXCLUDED_FEATURES+="\n * xload"
     fi
     if [ -f "$DESTDIR/usr/bin/Xfbdev" ]; then
-        INCLUDED_FEATURES+="\n  * Xfbdev (TinyX)"
+        INCLUDED_FEATURES+="\n * Xfbdev (TinyX)"
     else
-        EXCLUDED_FEATURES+="\n  * Xfbdev (TinyX)"
+        EXCLUDED_FEATURES+="\n * Xfbdev (TinyX)"
     fi
     if [ -f "$DESTDIR/usr/bin/xset" ]; then
-        INCLUDED_FEATURES+="\n  * xset"
+        INCLUDED_FEATURES+="\n * xset"
     else
-        EXCLUDED_FEATURES+="\n  * xset"
+        EXCLUDED_FEATURES+="\n * xset"
     fi
 
     # SHORKTUI
     if $ENABLE_GCC; then
-        INCLUDED_FEATURES+="\n  * as"
-        INCLUDED_FEATURES+="\n  * g++"
-        INCLUDED_FEATURES+="\n  * gcc"
-        INCLUDED_FEATURES+="\n  * gfortran"
+        INCLUDED_FEATURES+="\n * as"
+        INCLUDED_FEATURES+="\n * g++"
+        INCLUDED_FEATURES+="\n * gcc"
+        INCLUDED_FEATURES+="\n * gfortran"
     else
-        EXCLUDED_FEATURES+="\n  * as"
-        EXCLUDED_FEATURES+="\n  * g++"
-        EXCLUDED_FEATURES+="\n  * gcc"
-        EXCLUDED_FEATURES+="\n  * gfortran"
+        EXCLUDED_FEATURES+="\n * as"
+        EXCLUDED_FEATURES+="\n * g++"
+        EXCLUDED_FEATURES+="\n * gcc"
+        EXCLUDED_FEATURES+="\n * gfortran"
     fi
     if [ -f "$DESTDIR/usr/bin/emacs" ]; then
-        INCLUDED_FEATURES+="\n  * emacs (Mg)"
+        INCLUDED_FEATURES+="\n * emacs (Mg)"
     else
-        EXCLUDED_FEATURES+="\n  * emacs (Mg)"
+        EXCLUDED_FEATURES+="\n * emacs (Mg)"
     fi
     if [ -f "$DESTDIR/usr/bin/file" ]; then
-        INCLUDED_FEATURES+="\n  * file"
+        INCLUDED_FEATURES+="\n * file"
     else
-        EXCLUDED_FEATURES+="\n  * file"
+        EXCLUDED_FEATURES+="\n * file"
     fi
     if [ -f "$DESTDIR/usr/bin/ftp" ]; then
-        INCLUDED_FEATURES+="\n  * ftp (tnftp)"
+        INCLUDED_FEATURES+="\n * ftp (tnftp)"
     else
-        EXCLUDED_FEATURES+="\n  * ftp (tnftp)"
+        EXCLUDED_FEATURES+="\n * ftp (tnftp)"
     fi
     if [ -f "$DESTDIR/usr/bin/git" ]; then
-        INCLUDED_FEATURES+="\n  * git"
+        INCLUDED_FEATURES+="\n * git"
     else
-        EXCLUDED_FEATURES+="\n  * git"
+        EXCLUDED_FEATURES+="\n * git"
     fi
     if [ -f "$DESTDIR/usr/bin/nano" ]; then
-        INCLUDED_FEATURES+="\n  * nano"
+        INCLUDED_FEATURES+="\n * nano"
     else
-        EXCLUDED_FEATURES+="\n  * nano"
+        EXCLUDED_FEATURES+="\n * nano"
     fi
     if [ -f "$DESTDIR/usr/bin/scp" ]; then
-        INCLUDED_FEATURES+="\n  * scp (Dropbear)"
+        INCLUDED_FEATURES+="\n * scp (Dropbear)"
     else
-        EXCLUDED_FEATURES+="\n  * scp (Dropbear)"
+        EXCLUDED_FEATURES+="\n * scp (Dropbear)"
     fi
     if [ -f "$DESTDIR/usr/bin/ssh" ]; then
-        INCLUDED_FEATURES+="\n  * ssh (Dropbear)"
+        INCLUDED_FEATURES+="\n * ssh (Dropbear)"
     else
-        EXCLUDED_FEATURES+="\n  * ssh (Dropbear)"
+        EXCLUDED_FEATURES+="\n * ssh (Dropbear)"
     fi
     if [ -f "$DESTDIR/usr/local/bin/i386-tcc" ]; then
-        INCLUDED_FEATURES+="\n  * tcc"
+        INCLUDED_FEATURES+="\n * tcc"
     else
-        EXCLUDED_FEATURES+="\n  * tcc"
+        EXCLUDED_FEATURES+="\n * tcc"
     fi
     if [ -f "$DESTDIR/usr/bin/tic" ]; then
-        INCLUDED_FEATURES+="\n  * tic"
+        INCLUDED_FEATURES+="\n * tic"
     else
-        EXCLUDED_FEATURES+="\n  * tic"
+        EXCLUDED_FEATURES+="\n * tic"
     fi
 }
 
@@ -4473,9 +4474,9 @@ generate_report()
     lines+=(
         ""
         "Versions:"
-        "  * SHORK 486: $VER"
-        "  * Kernel: $KERNEL_VER"
-        "  * BusyBox: $BUSYBOX_VER"
+        " * SHORK 486: $VER"
+        " * Kernel: $KERNEL_VER"
+        " * BusyBox: $BUSYBOX_VER"
     )
 
     lines+=(
@@ -4512,6 +4513,18 @@ generate_report()
             ""
             "Excluded programs & features: $EXCLUDED_FEATURES"
         )
+    fi
+
+    if $DOTENV_USED; then
+         if [ -f "$CURR_DIR/.env" ]; then
+            lines+=(
+                ""
+                ".env contents:"
+            )
+            while IFS= read -r envline; do
+                lines+=("$envline")
+            done < "${CURR_DIR}/.env"
+        fi
     fi
 
     printf "%b\n" "${lines[@]}" | sudo tee "$CURR_DIR/images/report.txt" > /dev/null

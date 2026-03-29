@@ -34,6 +34,7 @@ CUSTOM=false
 TARGET_DISK=72
 TARGET_SWAP=8
 SET_KEYMAP="en_us"
+HOSTNAME="shork-486"
 FIX_EXTLINUX=true
 ENABLE_NET=true
 SKIP_DROPBEAR=false
@@ -115,6 +116,7 @@ CUSTOM=$CUSTOM
 TARGET_DISK=$TARGET_DISK
 TARGET_SWAP=$TARGET_SWAP
 SET_KEYMAP="$SET_KEYMAP"
+HOSTNAME="$HOSTNAME"
 FIX_EXTLINUX=$FIX_EXTLINUX
 ENABLE_NET=$ENABLE_NET
 SKIP_DROPBEAR=$SKIP_DROPBEAR
@@ -343,6 +345,17 @@ if [ "$TYPE" != "Minimal" ]; then
         "${KEYMAP_ITEMS[@]}" \
         2>&1 >/dev/tty)
 fi
+
+
+
+# Get hostname
+HOSTNAME=$(dialog --clear \
+    --backtitle "SHORK 486 Build Configurator" \
+    --title "Hostname" \
+    --cancel-label "Skip" \
+    --inputbox "Enter a hostname for your computer. It may be a simple local name or a Fully Qualified Domain Name." \
+    8 $WIDTH "$HOSTNAME" \
+    2>&1 >/dev/tty)
 
 
 
