@@ -140,6 +140,7 @@ NO_MENU=false
 PHYSICAL_ALIGN=0x2000
 PHYSICAL_START=""
 SET_KEYMAP=""
+SHORKUTILS_RECLONE=false
 SKIP_BB=false
 SKIP_DROPBEAR=false
 SKIP_EMACS=false
@@ -228,6 +229,9 @@ while [ $# -gt 0 ]; do
             ;;
         --set-keymap=*)
             SET_KEYMAP="${1#*=}"
+            ;;
+        --shorkutils-reclone)
+            SHORKUTILS_RECLONE=true
             ;;
         --skip-busybox)
             SKIP_BB=true
@@ -3518,7 +3522,7 @@ get_shorkcommon_sh()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "$DESTDIR/usr/bin/shorkcommon.sh" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorkcommon.sh" ]; then
         echo -e "${LIGHT_RED}shorkcommon-sh already copied, skipping...${RESET}"
         return
     fi
@@ -3536,7 +3540,7 @@ get_shorkcommon_sh()
 
     # Copy
     echo -e "${GREEN}Copying shorkcommon-sh...${RESET}"
-    cp shorkcommon.sh $DESTDIR/usr/bin/shorkcommon.sh
+    sudo cp shorkcommon.sh $DESTDIR/usr/bin/shorkcommon.sh
 }
 
 # Download and compile shorkdir
@@ -3545,7 +3549,7 @@ get_shorkdir()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "$DESTDIR/usr/bin/shorkdir" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorkdir" ]; then
         echo -e "${LIGHT_RED}shorkdir already compiled, skipping...${RESET}"
         return
     fi
@@ -3573,7 +3577,7 @@ get_shorkfetch()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "$DESTDIR/usr/bin/shorkfetch" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorkfetch" ]; then
         echo -e "${LIGHT_RED}shorkfetch already compiled, skipping...${RESET}"
         return
     fi
@@ -3601,7 +3605,7 @@ get_shorkfont()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "$DESTDIR/usr/libexec/shorkfont" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/libexec/shorkfont" ]; then
         echo -e "${LIGHT_RED}shorkfont already copied, skipping...${RESET}"
         return
     fi
@@ -3631,7 +3635,7 @@ get_shorkhelp()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "$DESTDIR/usr/bin/shorkhelp" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorkhelp" ]; then
         echo -e "${LIGHT_RED}shorkhelp already compiled, skipping...${RESET}"
         return
     fi
@@ -3659,7 +3663,7 @@ get_shorkmap()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "$DESTDIR/usr/bin/shorkmap" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorkmap" ]; then
         echo -e "${LIGHT_RED}shorkmap already copied, skipping...${RESET}"
         return
     fi
@@ -3677,8 +3681,8 @@ get_shorkmap()
 
     # Copy
     echo -e "${GREEN}Copying shorkmap...${RESET}"
-    cp shorkmap.486 $DESTDIR/usr/bin/shorkmap
-    chmod +x $DESTDIR/usr/bin/shorkmap
+    sudo cp shorkmap.486 $DESTDIR/usr/bin/shorkmap
+    sudo chmod +x $DESTDIR/usr/bin/shorkmap
 }
 
 # Download and copy shorkoff
@@ -3687,7 +3691,7 @@ get_shorkoff()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "$DESTDIR/sbin/shorkoff" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/sbin/shorkoff" ]; then
         echo -e "${LIGHT_RED}shorkoff already copied, skipping...${RESET}"
         return
     fi
@@ -3705,8 +3709,8 @@ get_shorkoff()
 
     # Copy
     echo -e "${GREEN}Copying shorkoff...${RESET}"
-    cp shorkoff.486 $DESTDIR/sbin/shorkoff
-    chmod +x $DESTDIR/sbin/shorkoff
+    sudo cp shorkoff.486 $DESTDIR/sbin/shorkoff
+    sudo chmod +x $DESTDIR/sbin/shorkoff
 }
 
 # Download and copy shorkres
@@ -3715,7 +3719,7 @@ get_shorkres()
     cd "$CURR_DIR/build"
 
     # Skip if already copied
-    if [ -f "$DESTDIR/usr/bin/shorkres" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorkres" ]; then
         echo -e "${LIGHT_RED}shorkres already copied, skipping...${RESET}"
         return
     fi
@@ -3733,8 +3737,8 @@ get_shorkres()
 
     # Copy
     echo -e "${GREEN}Copying shorkres...${RESET}"
-    cp shorkres.486 $DESTDIR/usr/bin/shorkres
-    chmod +x $DESTDIR/usr/bin/shorkres
+    sudo cp shorkres.486 $DESTDIR/usr/bin/shorkres
+    sudo chmod +x $DESTDIR/usr/bin/shorkres
 }
 
 
@@ -3749,7 +3753,7 @@ get_shorklocomotive()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "$DESTDIR/usr/bin/sl" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/sl" ]; then
         echo -e "${LIGHT_RED}shorklocomotive already compiled, skipping...${RESET}"
         return
     fi
@@ -3780,7 +3784,7 @@ get_shorksay()
     cd "$CURR_DIR/build"
 
     # Skip if already compiled
-    if [ -f "$DESTDIR/usr/bin/shorksay" ]; then
+    if [ "$SHORKUTILS_RECLONE" != "true" ] && [ -f "$DESTDIR/usr/bin/shorksay" ]; then
         echo -e "${LIGHT_RED}shorksay already compiled, skipping...${RESET}"
         return
     fi
