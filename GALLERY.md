@@ -1,74 +1,23 @@
 # SHORK 486 Gallery
 
-* Updated 18th February 2026
+* Updated 11th April 2026
+
+
 
 ## Photos
 
 <table style="table-layout: fixed; width: 100%;">
   <tr>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_boot_menu.jpg" style="width: 100%;" /></td>
     <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed.jpg" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td>Boot menu</td>
-    <td>First boot</td>
-  </tr>
-</table>
-
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260126_365ed_shorkhelp_intro.jpg" style="width: 100%;" /></td>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_shorkhelp_commands.jpg" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td>shorkhelp --intro</td>
-    <td>shorkhelp --commands</td>
-  </tr>
-</table>
-
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
     <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_shorkfetch.jpg" style="width: 100%;" /></td>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_lsblk_df_free.jpg" style="width: 100%;" /></td>
   </tr>
   <tr>
-    <td>shorkfetch</td>
-    <td>lsblk, df & free</td>
+    <td>First boot on IBM ThinkPad 365ED</td>
+    <td>shorkfetch on IBM ThinkPad 365ED</td>
   </tr>
 </table>
 
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_ed.jpg" style="width: 100%;" /></td>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_mg.jpg" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td>ed</td>
-    <td>Mg (Emacs)</td>
-  </tr>
-</table>
 
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_nano.jpg" style="width: 100%;" /></td>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260126_365ed_git_init_1.jpg" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td>nano</td>
-    <td>Git init</td>
-  </tr>
-</table>
-
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260126_365ed_shorkcol.jpg" style="width: 100%;" /></td>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_shorkoff.jpg" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td>shorkcol (outdated photo)</td>
-    <td>shorkoff</td>
-  </tr>
-</table>
 
 ## 86Box screenshots
 
@@ -85,12 +34,67 @@
 
 <table style="table-layout: fixed; width: 100%;">
   <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkfetch.png" style="width: 100%;" /></td>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkhelp_commands.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorkfetch/refs/heads/main/screenshots/86box_shork-486.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorkhelp/refs/heads/main/screenshots/86box_commands.png" style="width: 100%;" /></td>
   </tr>
   <tr>
     <td>shorkfetch</td>
-    <td>shorkhelp --commands</td>
+    <td>shorkhelp (--commands)</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorkdir/refs/heads/main/screenshots/86box_usr_bin_shork-486.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorksay/refs/heads/main/screenshot.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td>shorkdir</td>
+    <td>shorksay</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkfont.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkfont_colour.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td>shorkfont (1)</td>
+    <td>shorkfont (2)</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkmap.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkoff.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td>shorkmap</td>
+    <td>shorkoff</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_ed.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_nano.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td>ed</td>
+    <td>nano</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_mg.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_git_init.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td>Mg</td>
+    <td>git init</td>
   </tr>
 </table>
 
@@ -107,7 +111,7 @@
 
 <table style="table-layout: fixed; width: 100%;">
   <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkgui_crop.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shorkgui.png" style="width: 100%;" /></td>
     <td style="width: 50%; text-align: center;"></td>
   </tr>
   <tr>
@@ -115,6 +119,8 @@
     <td></td>
   </tr>
 </table>
+
+
 
 ## VMware Workstation screenshots
 
