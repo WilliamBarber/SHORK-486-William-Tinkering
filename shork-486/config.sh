@@ -196,7 +196,7 @@ TYPE=$(dialog --clear \
     --backtitle "SHORK 486 Build Configurator" \
     --title "Build Type" \
     --cancel-label "Quit" \
-    --radiolist "Select the build type, presets for SHORK 486 feature levels. All except \"Custom\" will complete configuration now." $HEIGHT $WIDTH 6 \
+    --radiolist "Select the build type, presets for SHORK 486 feature levels. The \"Custom\" option will enable further prompts for software and feature selection." $HEIGHT $WIDTH 6 \
     "Default" "Requires 16MiB RAM + 72MiB disk"             $(val $DEFAULT) \
     "Minimal" "Requires 8MiB RAM + 16MiB disk"              $(val $MINIMAL) \
     "Maximal" "Requires 24MiB RAM + 440MiB disk"            $(val $MAXIMAL) \
@@ -302,7 +302,7 @@ while true; do
         --backtitle "SHORK 486 Build Configurator" \
         --title "Target Disk Size" \
         --cancel-label "Skip" \
-        --inputbox "Enter a target disk size in mebibytes (between 16 and 4096) to use when creating the disk image containing SHORK 486. Whilst the build script will try to honour this, if the complete build's size is larger, it will calculate a new size so the build doesn't fail." \
+        --inputbox "Enter a target disk size in mebibytes (between 16 and 4096) to use when creating the disk image containing SHORK 486. Whilst the build script will try to honour this, it will override it if the combined compiled system and optional swap partition size is larger than the target disk size so the build doesn't fail." \
         12 $WIDTH "$TARGET_DISK" \
         2>&1 >/dev/tty)
 

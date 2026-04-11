@@ -407,9 +407,10 @@ if [ -n "$SET_KEYMAP" ]; then
 fi
 
 # Set keymap-skip keymaps conflict check
-if [ -n "$SET_KEYMAP" ] && $SKIP_KEYMAPS; then
-    echo -e "${YELLOW}WARNING: the \"set keymap\" parameter has been ignored as the \"skip keymaps\" parameter was also used${RESET}"
-fi
+# OBSOLETE NOW CONFIGURATOR IS USED
+#if [ -n "$SET_KEYMAP" ] && $SKIP_KEYMAPS; then
+#    echo -e "${YELLOW}WARNING: the \"set keymap\" parameter has been ignored as the \"skip keymaps\" parameter was also used${RESET}"
+#fi
 
 
 
@@ -1141,10 +1142,10 @@ configure_kernel()
         FRAGS+="$CURR_DIR/configs/linux.config.sata.frag "
     fi
     
-    if [ -n "$TARGET_SWAP" ]; then
-        echo -e "${GREEN}Enabling kernel swap support...${RESET}"
-        FRAGS+="$CURR_DIR/configs/linux.config.swap.frag "
-    fi
+    #if [ -n "$TARGET_SWAP" ]; then
+    echo -e "${GREEN}Enabling kernel swap support...${RESET}"
+    FRAGS+="$CURR_DIR/configs/linux.config.swap.frag "
+    #fi
 
     if $ENABLE_SMP; then
         echo -e "${GREEN}Enabling kernel symmetric multiprocessing (SMP) support...${RESET}"
@@ -4289,11 +4290,6 @@ get_installed_programs_features()
         INCLUDED_FEATURES+="\n * kernel-level SMP support"
     else
         EXCLUDED_FEATURES+="\n * kernel-level SMP support"
-    fi
-    if [ -n "$TARGET_SWAP" ]; then
-        INCLUDED_FEATURES+="\n * kernel-level swap support"
-    else
-        EXCLUDED_FEATURES+="\n * kernel-level swap support"
     fi
     if $ENABLE_USB; then
         INCLUDED_FEATURES+="\n * kernel-level USB & HID support"
