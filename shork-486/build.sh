@@ -1184,10 +1184,10 @@ compile_kernel()
 {   
     cd "$CURR_DIR/build/linux/"
 
-    # Remove "-dirty" suffix until I can clone the kernel to my own
-    # repo
+    # Remove "-dirty" suffix until I can clone the kernel to my own repo
     sudo sed -i "s/printf '%s' -dirty/printf '%s'/" scripts/setlocalversion
-    
+
+    # Apply our patches
     echo -e "${GREEN}Applying E820 patch...${RESET}"
     patch -p1 < "$CURR_DIR/patches/7.0.0_6.14.11-e820.patch"
 

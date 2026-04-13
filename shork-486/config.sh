@@ -522,15 +522,15 @@ SKIPPED=$?
 if [[ $SKIPPED -eq 1 ]]; then
     :
 else
-    if [[ $OPTIONS =~ "cfonts" ]];     then ENABLE_CFONTS=true;         else ENABLE_CFONTS=false;           fi
-    if [[ $OPTIONS =~ "grub" ]];       then USE_GRUB=true;              else USE_GRUB=false;                fi
-    if [[ $OPTIONS =~ "gui" ]];        then ENABLE_GUI=true;            else ENABLE_GUI=false;              fi
-    if [[ $OPTIONS =~ "highmem" ]];    then ENABLE_HIGHMEM=true;        else ENABLE_HIGHMEM=false;          fi
-    #if [[ $OPTIONS =~ "keymaps" ]];    then SKIP_KEYMAPS=false;         else SKIP_KEYMAPS=true;             fi
-    if [[ $OPTIONS =~ "pci.ids" ]];    then SKIP_PCIIDS=false;          else SKIP_PCIIDS=true;              fi
-    if [[ $OPTIONS =~ "pcmcia" ]];     then ENABLE_PCMCIA=true;         else ENABLE_PCMCIA=false;           fi
-    if [[ $OPTIONS =~ "sata" ]];       then ENABLE_SATA=true;           else ENABLE_SATA=false;             fi
-    if [[ $OPTIONS =~ "sl" ]];         then ENABLE_SHORKTAINMENT=true;  else ENABLE_SHORKTAINMENT=false;    fi
-    if [[ $OPTIONS =~ "smp" ]];        then ENABLE_SMP=true;            else ENABLE_SMP=false;              fi
-    if [[ $OPTIONS =~ "usb" ]];        then ENABLE_USB=true;            else ENABLE_USB=false;              fi
+    if [[ $OPTIONS =~ "cfonts" ]];          then ENABLE_CFONTS=true;         else ENABLE_CFONTS=false;           fi
+    if [[ $OPTIONS =~ "grub" ]];            then USE_GRUB=true;              else USE_GRUB=false;                fi
+    if [[ $OPTIONS =~ "gui" ]];             then ENABLE_GUI=true;            else ENABLE_GUI=false;              fi
+    if [[ $OPTIONS =~ "highmem" ]];         then ENABLE_HIGHMEM=true;        else ENABLE_HIGHMEM=false;          fi
+    #if [[ $OPTIONS =~ "keymaps" ]];         then SKIP_KEYMAPS=false;         else SKIP_KEYMAPS=true;             fi
+    if [[ $OPTIONS =~ "pci.ids" ]];         then SKIP_PCIIDS=false;          else SKIP_PCIIDS=true;              fi
+    if [[ $OPTIONS =~ "pcmcia" ]];          then ENABLE_PCMCIA=true;         else ENABLE_PCMCIA=false;           fi
+    if [[ $OPTIONS =~ "sata" ]];            then ENABLE_SATA=true;           else ENABLE_SATA=false;             fi
+    if [[ $OPTIONS =~ "shorktainment" ]];   then ENABLE_SHORKTAINMENT=true;  else ENABLE_SHORKTAINMENT=false;    fi
+    if [[ $OPTIONS =~ "smp" ]];             then ENABLE_SMP=true;            else ENABLE_SMP=false;              fi
+    if [[ $OPTIONS =~ "usb" ]];             then ENABLE_USB=true;            else ENABLE_USB=false;              fi
 fi
