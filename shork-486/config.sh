@@ -36,11 +36,12 @@ TARGET_SWAP=8
 SET_KEYMAP="en_us"
 HOSTNAME="shork-486"
 FIX_EXTLINUX=true
-ENABLE_NET=true
+ENABLE_NET_ETH=true
 SKIP_DROPBEAR=false
 SKIP_FILE=false
 SKIP_GIT=false
 SKIP_EMACS=false
+ENABLE_HTOP=true
 SKIP_NANO=false
 ENABLE_SHORKTAINMENT=true
 SKIP_TCC=false
@@ -119,12 +120,13 @@ TARGET_SWAP=$TARGET_SWAP
 SET_KEYMAP="$SET_KEYMAP"
 HOSTNAME="$HOSTNAME"
 FIX_EXTLINUX=$FIX_EXTLINUX
-ENABLE_NET=$ENABLE_NET
+ENABLE_NET_ETH=$ENABLE_NET_ETH
 SKIP_DROPBEAR=$SKIP_DROPBEAR
 SKIP_FILE=$SKIP_FILE
 ENABLE_GCC=$ENABLE_GCC
 SKIP_GIT=$SKIP_GIT
 SKIP_EMACS=$SKIP_EMACS
+ENABLE_HTOP=$ENABLE_HTOP
 SKIP_NANO=$SKIP_NANO
 ENABLE_SHORKTAINMENT=$ENABLE_SHORKTAINMENT
 SKIP_TCC=$SKIP_TCC
@@ -211,11 +213,12 @@ elif [ "$TYPE" == "Default" ]; then
     MINIMAL=false
     MAXIMAL=false
     CUSTOM=false
-    ENABLE_NET=true
+    ENABLE_NET_ETH=true
     SKIP_DROPBEAR=false
     SKIP_FILE=false
     SKIP_GIT=false
     SKIP_EMACS=false
+    ENABLE_HTOP=true
     SKIP_NANO=false
     ENABLE_SHORKTAINMENT=true
     SKIP_TCC=false
@@ -238,11 +241,12 @@ elif [ "$TYPE" == "Minimal" ]; then
     MINIMAL=true
     MAXIMAL=false
     CUSTOM=false
-    ENABLE_NET=false
+    ENABLE_NET_ETH=false
     SKIP_DROPBEAR=true
     SKIP_FILE=true
     SKIP_GIT=true
     SKIP_EMACS=true
+    ENABLE_HTOP=false
     SKIP_NANO=true
     ENABLE_SHORKTAINMENT=false
     SKIP_TCC=true
@@ -265,11 +269,12 @@ elif [ "$TYPE" == "Maximal" ]; then
     MINIMAL=false
     MAXIMAL=true
     CUSTOM=false
-    ENABLE_NET=true
+    ENABLE_NET_ETH=true
     SKIP_DROPBEAR=false
     SKIP_FILE=false
     SKIP_GIT=false
     SKIP_EMACS=false
+    ENABLE_HTOP=true
     SKIP_NANO=false
     ENABLE_SHORKTAINMENT=true
     SKIP_TCC=false
@@ -431,16 +436,16 @@ fi
 # Get networking support choice
 dialog --clear \
     --backtitle "SHORK 486 Build Configurator" \
-    --title "Networking Support" \
-    --yesno "Do you want to enable networking support in SHORK 486? It includes kernel-level networking support and BusyBox's networking-related utilities, and you will be able to choose software that requires an internet connection in the next prompt." \
+    --title "Ethernet Networking Support" \
+    --yesno "Do you want to enable ethernet networking support in SHORK 486? It includes kernel-level ethernet networking support and BusyBox's networking-related utilities, and you will be able to choose software that requires an internet connection in the next prompt." \
     9 $WIDTH
 
 CHOICE=$?
 
 if [[ $CHOICE -eq 0 ]]; then
-    ENABLE_NET=true
+    ENABLE_NET_ETH=true
 elif [[ $CHOICE -eq 1 ]]; then
-    ENABLE_NET=false
+    ENABLE_NET_ETH=false
     SKIP_DROPBEAR=true
     SKIP_GIT=true
     SKIP_TNFTP=true
@@ -451,12 +456,13 @@ fi
 # Get bundled software choices
 BUNDLED_ITEMS=()
 
-if [ "$ENABLE_NET" == true ]; then
+if [ "$ENABLE_NET_ETH" == true ]; then
     BUNDLED_ITEMS+=(
         "dropbear"      "SCP & SSH client (+0.4MiB)"                        "$(val_inv "$SKIP_DROPBEAR")"
         "file"          "File type identification (+10MiB)"                 "$(val_inv "$SKIP_FILE")"
         "gcc"           "*GCC (as, g++, gcc, gfortran) + musl (+215MiB)"    "$(val "$ENABLE_GCC")"
         "git"           "Source control client (+19MiB)"                    "$(val_inv "$SKIP_GIT")"
+        "htop"          "htop (+0.6MiB)"                                    "$(val "$ENABLE_HTOP")"
         "mg"            "Emacs-style text editor (+0.3MiB)"                 "$(val_inv "$SKIP_EMACS")"
         "nano"          "Text editor (+1MiB)"                               "$(val_inv "$SKIP_NANO")"
         "shorktainment" "shorksay & sl (+0.06MiB)"                          "$(val "$ENABLE_SHORKTAINMENT")"
@@ -467,6 +473,7 @@ else
     BUNDLED_ITEMS+=(
         "file"          "File type identification (+10MiB)"                 "$(val_inv "$SKIP_FILE")"
         "gcc"           "*GCC (as, g++, gcc, gfortran) + musl (+215MiB)"    "$(val "$ENABLE_GCC")"
+        "htop"          "htop (+0.6MiB)"                                    "$(val "$ENABLE_HTOP")"
         "mg"            "Emacs-style text editor (+0.3MiB)"                 "$(val_inv "$SKIP_EMACS")"
         "nano"          "Text editor (+1MiB)"                               "$(val_inv "$SKIP_NANO")"
         "shorktainment" "shorksay & sl (+0.06MiB)"                          "$(val "$ENABLE_SHORKTAINMENT")"
@@ -491,6 +498,7 @@ else
     if [[ $BUNDLED =~ "file" ]];            then SKIP_FILE=false;               else SKIP_FILE=true;                fi
     if [[ $BUNDLED =~ "gcc" ]];             then ENABLE_GCC=true;               else ENABLE_GCC=false;              fi
     if [[ $BUNDLED =~ "git" ]];             then SKIP_GIT=false;                else SKIP_GIT=true;                 fi
+    if [[ $BUNDLED =~ "htop" ]];            then ENABLE_HTOP=true;              else ENABLE_HTOP=false;             fi
     if [[ $BUNDLED =~ "mg" ]];              then SKIP_EMACS=false;              else SKIP_EMACS=true;               fi
     if [[ $BUNDLED =~ "nano" ]];            then SKIP_NANO=false;               else SKIP_NANO=true;                fi
     if [[ $BUNDLED =~ "shorktainment" ]];   then ENABLE_SHORKTAINMENT=true;     else ENABLE_SHORKTAINMENT=false;    fi

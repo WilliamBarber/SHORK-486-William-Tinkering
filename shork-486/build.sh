@@ -97,6 +97,7 @@ CURL_VER="8.19.0"
 DROPBEAR_VER="2025.89"
 FILE_VER="FILE5_47"
 GIT_VER="2.53.0"
+HTOP_VER="3.5.0"
 KERNEL_VER="7.0"
 LIBEVENT_VER="release-2.1.12-stable"
 MG_VER="3.7"
@@ -123,11 +124,15 @@ ENABLE_FB=true
 ENABLE_GCC=false
 ENABLE_GUI=false
 ENABLE_HIGHMEM=false
-ENABLE_NET=true
+ENABLE_HTOP=true
+ENABLE_MULTIUSER=false
+ENABLE_NET_BASE=false
+ENABLE_NET_ETH=false
 ENABLE_PCMCIA=true
 ENABLE_SATA=false
 ENABLE_SHORKTAINMENT=true
 ENABLE_SMP=false
+ENABLE_TASKSTATS=false
 ENABLE_TESTS=false
 ENABLE_USB=false
 FIX_EXTLINUX=false
@@ -162,10 +167,6 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --always-build)
             ALWAYS_BUILD=true
-            ;;
-        --disable-networking)
-            ENABLE_NET=false
-            BUILD_TYPE="custom"
             ;;
         --disable-pcmcia)
             ENABLE_PCMCIA=false
@@ -342,7 +343,7 @@ else
 fi
 
 # Override to ensure PCMCIA support (for PCMCIA NICs) is enabled when networking support is also desired
-if $ENABLE_NET; then
+if $ENABLE_NET_ETH; then
     ENABLE_PCMCIA=true
 # If networking support is disabled, make sure networking-based programs are also skipped
 else
@@ -354,6 +355,17 @@ fi
 # Override to ensure the "use GRUB" parameter is disabled when the "Fix EXTLINUX" parameter is used
 if $FIX_EXTLINUX; then
     USE_GRUB=false
+fi
+
+# Override to ensure MULTIUSER and TASKSTATS are enabled with HTOP
+if [ "$ENABLE_HTOP" = true ]; then
+    ENABLE_MULTIUSER=true
+    ENABLE_TASKSTATS=true
+fi
+
+# Override to ensure NET_MIN is enabled with HTOP or NET
+if [ "$ENABLE_HTOP" = true ] || [ "ENABLE_NET_ETH" = true ]; then
+    ENABLE_NET_BASE=true
 fi
 
 
@@ -405,12 +417,6 @@ if [ -n "$SET_KEYMAP" ]; then
         exit 1
     fi
 fi
-
-# Set keymap-skip keymaps conflict check
-# OBSOLETE NOW CONFIGURATOR IS USED
-#if [ -n "$SET_KEYMAP" ] && $SKIP_KEYMAPS; then
-#    echo -e "${YELLOW}WARNING: the \"set keymap\" parameter has been ignored as the \"skip keymaps\" parameter was also used${RESET}"
-#fi
 
 
 
@@ -941,7 +947,7 @@ get_busybox()
     sed -i "s|^CONFIG_EXTRA_CFLAGS=.*|CONFIG_EXTRA_CFLAGS=\"-I${PREFIX}/include\"|" .config
     sed -i "s|^CONFIG_EXTRA_LDFLAGS=.*|CONFIG_EXTRA_LDFLAGS=\"-L${PREFIX}/lib\"|" .config
 
-    if $ENABLE_NET; then
+    if $ENABLE_NET_ETH; then
         echo -e "${GREEN}Enabling BusyBox's ftpget, ftpput, ifconfig, ip, ping, route, telnet, traceroute, udhcpc, wget and whois implementations...${RESET}"
         sed -i 's/# CONFIG_FEATURE_FANCY_PING is not set/CONFIG_FEATURE_FANCY_PING=y/' .config
         sed -i 's/# CONFIG_FEATURE_IFCONFIG_BROADCAST_PLUS is not set/CONFIG_FEATURE_IFCONFIG_BROADCAST_PLUS=y/' .config
@@ -1113,42 +1119,57 @@ configure_kernel()
     FRAGS=""
     
     if $ENABLE_FB; then
-        echo -e "${GREEN}Enabling kernel framebuffer, VESA and enhanced VGA support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level framebuffer, VESA and enhanced VGA support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.fb.frag "
     fi
 
     if $ENABLE_GUI; then
-        echo -e "${GREEN}Enabling kernel event interface support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level event interface support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.x11.frag "
     fi
 
     if $ENABLE_HIGHMEM; then
-        echo -e "${GREEN}Enabling kernel high memory support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level high memory support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.highmem.frag "
     fi
 
     if $ENABLE_PCMCIA; then
-        echo -e "${GREEN}Enabling kernel PCMCIA support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level PCMCIA support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.pcmcia.frag "
     fi
 
-    if $ENABLE_NET; then
-        echo -e "${GREEN}Enabling kernel networking support...${RESET}"
-        FRAGS+="$CURR_DIR/configs/linux.config.net.frag "
+    if $ENABLE_MULTIUSER; then
+        echo -e "${GREEN}Enabling kernel-level multi-user support...${RESET}"
+        FRAGS+="$CURR_DIR/configs/linux.config.multiuser.frag "
+    fi
+
+    if $ENABLE_NET_BASE; then
+        echo -e "${GREEN}Enabling kernel-level networking support (base)...${RESET}"
+        FRAGS+="$CURR_DIR/configs/linux.config.net.base.frag "
+    fi
+
+    if $ENABLE_NET_ETH; then
+        echo -e "${GREEN}Enabling kernel-level networking support (ethernet)...${RESET}"
+        FRAGS+="$CURR_DIR/configs/linux.config.net.eth.frag "
     fi
 
     if $ENABLE_SATA; then
-        echo -e "${GREEN}Enabling kernel SATA support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level SATA support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.sata.frag "
     fi
 
     if $ENABLE_SMP; then
-        echo -e "${GREEN}Enabling kernel symmetric multiprocessing (SMP) support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level symmetric multiprocessing (SMP) support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.smp.frag "
     fi
 
+    if $ENABLE_TASKSTATS; then
+        echo -e "${GREEN}Enabling kernel-level taskstats support...${RESET}"
+        FRAGS+="$CURR_DIR/configs/linux.config.taskstats.frag "
+    fi
+
     if $ENABLE_USB; then
-        echo -e "${GREEN}Enabling kernel USB & HID support...${RESET}"
+        echo -e "${GREEN}Enabling kernel-level USB & HID support...${RESET}"
         FRAGS+="$CURR_DIR/configs/linux.config.usb.frag "
     fi
 
@@ -3263,6 +3284,40 @@ get_git()
     cp COPYING $CURR_DIR/build/LICENCES/git.txt
 }
 
+# Download and compile htop
+get_htop()
+{
+    cd "$CURR_DIR/build"
+
+    # Skip if already compiled
+    if [ -f "$DESTDIR/usr/bin/htop" ]; then
+        echo -e "${LIGHT_RED}htop already compiled, skipping...${RESET}"
+        return
+    fi
+
+    # Download source
+    if [ -d htop ]; then
+        echo -e "${YELLOW}htop source already present, resetting...${RESET}"
+        cd htop
+        git config --global --add safe.directory "$CURR_DIR/build/htop"
+        git reset --hard
+    else
+        echo -e "${GREEN}Downloading htop...${RESET}"
+        git clone --branch "${HTOP_VER}" https://github.com/htop-dev/htop.git
+        cd htop
+    fi
+
+    # Compile and install
+    echo -e "${GREEN}Compiling htop...${RESET}"
+    ./autogen.sh
+    ./configure --host=${HOST} --prefix=/usr CC="${CC_STATIC}" AR="${AR}" RANLIB="${RANLIB}"  CFLAGS="-Os -march=i486 -I${PREFIX}/include -I${PREFIX}/include/ncursesw" LDFLAGS="-static -L${PREFIX}/lib"
+    make -j$(nproc)
+    sudo cp htop $DESTDIR/usr/bin
+
+    # Copy licence file
+    cp COPYING $CURR_DIR/build/LICENCES/htop.txt
+}
+
 # Download and compile musl
 get_musl()
 {
@@ -4259,11 +4314,13 @@ get_installed_programs_features()
     else
         EXCLUDED_FEATURES+="\n * kernel-level event interface support"
     fi
+
     if $ENABLE_FB; then
         INCLUDED_FEATURES+="\n * kernel-level framebuffer, VESA & enhanced VGA support"
     else
         EXCLUDED_FEATURES+="\n * kernel-level framebuffer, VESA & enhanced VGA support"
     fi
+
     if $ENABLE_HIGHMEM; then
         if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
             EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
@@ -4272,16 +4329,31 @@ get_installed_programs_features()
     else
         EXCLUDED_FEATURES+="\n * kernel-level high memory support"
     fi
-    if $ENABLE_NET; then
-        INCLUDED_FEATURES+="\n * kernel-level networking support"
+
+    if $ENABLE_MULTIUSER; then
+        INCLUDED_FEATURES+="\n * kernel-level multi-user support"
     else
-        EXCLUDED_FEATURES+="\n * kernel-level networking support"
+        EXCLUDED_FEATURES+="\n * kernel-level multi-user support"
     fi
+
+    if $ENABLE_NET_BASE; then
+        INCLUDED_FEATURES+="\n * kernel-level networking support (base)"
+    else
+        EXCLUDED_FEATURES+="\n * kernel-level networking support (base)"
+    fi
+
+    if $ENABLE_NET_ETH; then
+        INCLUDED_FEATURES+="\n * kernel-level networking support (ethernet)"
+    else
+        EXCLUDED_FEATURES+="\n * kernel-level networking support (ethernet)"
+    fi
+
     if $ENABLE_PCMCIA; then
         INCLUDED_FEATURES+="\n * kernel-level PCMCIA support"
     else
         EXCLUDED_FEATURES+="\n * kernel-level PCMCIA support"
     fi
+
     if $ENABLE_SATA; then
         if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
             EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
@@ -4290,11 +4362,13 @@ get_installed_programs_features()
     else
         EXCLUDED_FEATURES+="\n * kernel-level SATA support"
     fi
-    if $ENABLE_SMP; then
-        INCLUDED_FEATURES+="\n * kernel-level SMP support"
+
+    if $ENABLE_TASKSTATS; then
+        INCLUDED_FEATURES+="\n * kernel-level taskstats support"
     else
-        EXCLUDED_FEATURES+="\n * kernel-level SMP support"
+        EXCLUDED_FEATURES+="\n * kernel-level taskstats support"
     fi
+
     if $ENABLE_USB; then
         INCLUDED_FEATURES+="\n * kernel-level USB & HID support"
     else
@@ -4455,6 +4529,11 @@ get_installed_programs_features()
         INCLUDED_FEATURES+="\n * git"
     else
         EXCLUDED_FEATURES+="\n * git"
+    fi
+    if [ -f "$DESTDIR/usr/bin/htop" ]; then
+        INCLUDED_FEATURES+="\n * htop"
+    else
+        EXCLUDED_FEATURES+="\n * htop"
     fi
     if [ -f "$DESTDIR/usr/bin/nano" ]; then
         INCLUDED_FEATURES+="\n * nano"
@@ -4645,6 +4724,9 @@ if $ENABLE_GCC; then
 fi
 if ! $SKIP_GIT; then
     get_git
+fi
+if $ENABLE_HTOP; then
+    get_htop
 fi
 if ! $SKIP_NANO; then
     get_nano

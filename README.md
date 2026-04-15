@@ -48,6 +48,7 @@ ar, arch, ascii, awk, basename, bc, beep, blkid, cal, cat, chmod, chown, chroot,
 * [file](https://github.com/file/file) (file identification)
 * ftp (FTP client, [tnftp](https://ftp.netbsd.org/pub/NetBSD/misc/tnftp/))
 * [git](https://git-scm.com/) (Git source control client)
+* [htop](https://github.com/htop-dev) (interactive process viewer)
 * [nano](https://www.nano-editor.org) (text editor)
 * scp (SCP client, [Dropbear](https://github.com/mkj/dropbear))
 * ssh (SSH client, [Dropbear](https://github.com/mkj/dropbear))
@@ -160,7 +161,7 @@ When running the SHORK 486 Build Configurator, you will be prompted to select th
     * Keyboard layout (keymap)
 * Patched EXTLINUX (yes/no)
 * If "Custom" build type selected:
-    * Networking support
+    * Ethernet networking support
     * Bundled software
     * Options (all other configuration)
 
@@ -191,9 +192,9 @@ Selecting "Yes" here will tell the build script to use [my forked SYSLINUX/EXTLI
 
 
 
-#### Networking Support
+#### Ethernet Networking Support
 
-Selecting "Yes" here will enable networking support in SHORK 486. BusyBox will include implementations for the `ftpget`, `ftpput`, `ifconfig`, `ip`, `ping`, `route`, `telnet`, `traceroute`, `udhcpc`, `wget` and `whois` commands. You will be allowed to select bundled software and options that require an internet connection in the subsequent prompts.
+Selecting "Yes" here will enable ethernet networking support in SHORK 486. BusyBox will include implementations for the `ftpget`, `ftpput`, `ifconfig`, `ip`, `ping`, `route`, `telnet`, `traceroute`, `udhcpc`, `wget` and `whois` commands. You will be allowed to select bundled software and options that require an internet connection in the subsequent prompts.
 
 
 
