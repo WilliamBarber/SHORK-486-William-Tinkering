@@ -95,7 +95,7 @@ SYSROOT="${PREFIX}/i486-linux-musl"
 BUSYBOX_VER="1_36_1"
 CURL_VER="8.19.0"
 DROPBEAR_VER="2025.89"
-FILE_VER="FILE5_47"
+FILE_VER="5_47"
 GIT_VER="2.53.0"
 HTOP_VER="3.5.0"
 KERNEL_VER="7.0"
@@ -108,6 +108,7 @@ NEDIT_VER="NEDIT-CLASSIC-END"
 OPENSSL_VER="3.6.0"
 ROVER_VER="1.0.1"
 STRACE_VER="6.19"
+TCC_VER="e5eedc0"
 TMUX_VER="3.6a"
 TNFTP_VER="20260211"
 TWM_VER="1.0.13.1"
@@ -851,23 +852,6 @@ get_curl()
     ./configure --build="$(gcc -dumpmachine)" --host="${HOST}" --prefix="$SYSROOT" --with-openssl="$SYSROOT" --without-libpsl --disable-shared
     make -j$(nproc)
     make install
-}
-
-# Download and build tic (required for shorkfont)
-get_tic()
-{
-    cd "$CURR_DIR/build"
-
-    # Check if program already compiled, skip if so
-    if [ ! -f "$DESTDIR/usr/bin/tic" ]; then
-        echo -e "${GREEN}Building tic...${RESET}"
-        cd $CURR_DIR/build/ncurses/
-        ./configure --host=${HOST} --prefix=/usr --with-normal --without-shared --without-debug --without-cxx --enable-widec CC="${CC_STATIC}" CFLAGS="-Os -static"
-        make -C progs tic -j$(nproc)
-        sudo install -D progs/tic "$DESTDIR/usr/bin/tic"
-    else
-        echo -e "${LIGHT_RED}tic already compiled, skipping...${RESET}"
-    fi
 }
 
 # Download and build our forked EXTLINUX (required if "Fix EXTLINUX" was used)
@@ -3188,7 +3172,7 @@ get_file()
         git reset --hard
     else
         echo -e "${GREEN}Downloading file...${RESET}"
-        git clone --branch $FILE_VER https://github.com/file/file.git
+        git clone --branch "FILE$FILE_VER" https://github.com/file/file.git
         cd file
     fi
 
@@ -3474,8 +3458,9 @@ get_tcc()
         git reset --hard
     else
         echo -e "${GREEN}Downloading Tiny C Compiler...${RESET}"
-        git clone --branch latest-version https://github.com/Tiny-C-Compiler/tinycc-mirror-repository.git
+        git clone https://github.com/Tiny-C-Compiler/tinycc-mirror-repository.git
         cd tinycc-mirror-repository
+        git checkout $TCC_VER
     fi
 
     sed -i 's|i386-linux-gnu|local/musl|g' Makefile
@@ -3494,6 +3479,27 @@ get_tcc()
 
     # Copy licence file
     cp COPYING $CURR_DIR/build/LICENCES/tcc.txt
+}
+
+# Download and compile tic
+get_tic()
+{
+    cd "$CURR_DIR/build/ncurses"
+
+    # Skip if already compiled
+    if [ -f "$DESTDIR/usr/bin/tic" ]; then
+        echo -e "${LIGHT_RED}tic already compiled, skipping...${RESET}"
+        return
+    fi
+
+    # Compile and install
+    echo -e "${GREEN}Compiling tic...${RESET}"
+    ./configure --host=${HOST} --prefix=/usr --with-normal --without-shared --without-debug --without-cxx --enable-widec CC="${CC_STATIC}" CFLAGS="-Os -static"
+    make -C progs tic -j$(nproc)
+    sudo install -D progs/tic "$DESTDIR/usr/bin/tic"
+
+    # Copy licence file
+    cp COPYING $CURR_DIR/build/LICENCES/ncurses.txt
 }
 
 # Download and compile tmux
@@ -4386,6 +4392,11 @@ get_installed_programs_features()
     else
         EXCLUDED_FEATURES+="\n * keymaps"
     fi
+    if [ -f "$DESTDIR/usr/local/musl/lib/libc.so" ]; then
+        INCLUDED_FEATURES+="\n * musl (for TCC, $MUSL_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * musl (for TCC)"
+    fi
     if [ -f "$DESTDIR/usr/share/misc/pci.ids" ]; then
         INCLUDED_FEATURES+="\n * pci.ids database"
     else
@@ -4510,55 +4521,80 @@ get_installed_programs_features()
         EXCLUDED_FEATURES+="\n * gcc"
         EXCLUDED_FEATURES+="\n * gfortran"
     fi
-    if [ -f "$DESTDIR/usr/bin/emacs" ]; then
-        INCLUDED_FEATURES+="\n * emacs (Mg)"
-    else
-        EXCLUDED_FEATURES+="\n * emacs (Mg)"
-    fi
     if [ -f "$DESTDIR/usr/bin/file" ]; then
-        INCLUDED_FEATURES+="\n * file"
+        INCLUDED_FEATURES+="\n * file ($FILE_VER)"
     else
         EXCLUDED_FEATURES+="\n * file"
     fi
     if [ -f "$DESTDIR/usr/bin/ftp" ]; then
-        INCLUDED_FEATURES+="\n * ftp (tnftp)"
+        INCLUDED_FEATURES+="\n * ftp (tnftp, $TNFTP_VER)"
     else
         EXCLUDED_FEATURES+="\n * ftp (tnftp)"
     fi
     if [ -f "$DESTDIR/usr/bin/git" ]; then
-        INCLUDED_FEATURES+="\n * git"
+        INCLUDED_FEATURES+="\n * git ($GIT_VER)"
     else
         EXCLUDED_FEATURES+="\n * git"
     fi
     if [ -f "$DESTDIR/usr/bin/htop" ]; then
-        INCLUDED_FEATURES+="\n * htop"
+        INCLUDED_FEATURES+="\n * htop ($HTOP_VER)"
     else
         EXCLUDED_FEATURES+="\n * htop"
     fi
+    if [ -f "$DESTDIR/usr/bin/lsblk" ]; then
+        INCLUDED_FEATURES+="\n * lsblk (util-linux, $UTIL_LINUX_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * lsblk (util-linux)"
+    fi
+    if [ -f "$DESTDIR/usr/bin/mg" ]; then
+        INCLUDED_FEATURES+="\n * mg ($MG_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * mg"
+    fi
     if [ -f "$DESTDIR/usr/bin/nano" ]; then
-        INCLUDED_FEATURES+="\n * nano"
+        INCLUDED_FEATURES+="\n * nano ($NANO_VER)"
     else
         EXCLUDED_FEATURES+="\n * nano"
     fi
+    if [ -f "$DESTDIR/usr/bin/partx" ]; then
+        INCLUDED_FEATURES+="\n * partx (util-linux, $UTIL_LINUX_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * partx (util-linux)"
+    fi
     if [ -f "$DESTDIR/usr/bin/scp" ]; then
-        INCLUDED_FEATURES+="\n * scp (Dropbear)"
+        INCLUDED_FEATURES+="\n * scp (Dropbear, $DROPBEAR_VER)"
     else
         EXCLUDED_FEATURES+="\n * scp (Dropbear)"
     fi
+    if [ -f "$DESTDIR/usr/sbin/sfdisk" ]; then
+        INCLUDED_FEATURES+="\n * sfdisk (util-linux, $UTIL_LINUX_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * sfdisk (util-linux)"
+    fi
     if [ -f "$DESTDIR/usr/bin/ssh" ]; then
-        INCLUDED_FEATURES+="\n * ssh (Dropbear)"
+        INCLUDED_FEATURES+="\n * ssh (Dropbear, $DROPBEAR_VER)"
     else
         EXCLUDED_FEATURES+="\n * ssh (Dropbear)"
     fi
+    if [ -f "$DESTDIR/usr/bin/strace" ]; then
+        INCLUDED_FEATURES+="\n * strace ($STRACE_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * strace"
+    fi
     if [ -f "$DESTDIR/usr/local/bin/i386-tcc" ]; then
-        INCLUDED_FEATURES+="\n * tcc"
+        INCLUDED_FEATURES+="\n * tcc ($TCC_VER)"
     else
         EXCLUDED_FEATURES+="\n * tcc"
     fi
     if [ -f "$DESTDIR/usr/bin/tic" ]; then
-        INCLUDED_FEATURES+="\n * tic"
+        INCLUDED_FEATURES+="\n * tic ($NCURSES_VER)"
     else
         EXCLUDED_FEATURES+="\n * tic"
+    fi
+    if [ -f "$DESTDIR/usr/bin/whereis" ]; then
+        INCLUDED_FEATURES+="\n * whereis (util-linux, $UTIL_LINUX_VER)"
+    else
+        EXCLUDED_FEATURES+="\n * whereis (util-linux)"
     fi
 }
 
@@ -4578,8 +4614,16 @@ generate_report()
         "==     $DATE     =="
         "=================================="
         ""
-        "Build type: $BUILD_TYPE"
-        "Build time: $MINS minutes, $SECS seconds"
+        "Version:             SHORK 486 $VER"
+        "Kernel:              Linux $KERNEL_VER"
+        "Base:                BusyBox $BUSYBOX_VER"
+        "Bootloader:          $BOOTLDR_USED"
+    )
+
+    lines+=(
+        ""
+        "Build type:          $BUILD_TYPE"
+        "Build time:          $MINS minutes, $SECS seconds"
     )
 
     if [ -n "$USED_PARAMS" ]; then
@@ -4589,23 +4633,15 @@ generate_report()
     fi
     
     if $DOTENV_USED; then
-        lines+=(".env used: yes")
+        lines+=(".env used:           yes")
     else
-        lines+=(".env used: no")
+        lines+=(".env used:           no")
     fi
 
     lines+=(
         ""
-        "Versions:"
-        " * SHORK 486: $VER"
-        " * Kernel: $KERNEL_VER"
-        " * BusyBox: $BUSYBOX_VER"
-    )
-
-    lines+=(
-        ""
-        "Est. minimum RAM: ${EST_MIN_RAM}"
-        "Total disk size: ${TOTAL_DISK_SIZE}MiB"
+        "Est. minimum RAM:    ${EST_MIN_RAM}"
+        "Total disk size:     ${TOTAL_DISK_SIZE}MiB"
         "Root partition size: ${ROOT_PART_SIZE}MiB"
     )
 
@@ -4614,14 +4650,13 @@ generate_report()
     fi
 
     lines+=(
-        "CHS geometry: $DISK_CYLINDERS/$DISK_HEADS/$DISK_SECTORS_TRACK"
-        "Bootloader used: $BOOTLDR_USED"
+        "CHS geometry:        $DISK_CYLINDERS/$DISK_HEADS/$DISK_SECTORS_TRACK"
     )
 
     if $NO_MENU; then
-        lines+=("Boot style: boot only")
+        lines+=("Boot style:          boot only")
     else
-        lines+=("Boot style: menu")
+        lines+=("Boot style:          menu")
     fi
 
     if [ -n "$INCLUDED_FEATURES" ]; then
@@ -4670,7 +4705,6 @@ if ! $SKIP_BB; then
 fi
 
 get_ncurses
-get_tic
 
 get_strace
 get_util_linux
@@ -4735,6 +4769,7 @@ if ! $SKIP_TCC; then
     get_musl
     get_tcc
 fi
+get_tic
 if ! $SKIP_TNFTP; then
     get_tnftp
 fi
