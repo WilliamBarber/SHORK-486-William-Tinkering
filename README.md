@@ -4,13 +4,33 @@ Member of the SHORK family: **SHORK 486** | [SHORK DISKETTE](https://github.com/
 
 -----
 
-SHORK 486 is a minimal Linux distribution for vintage PCs! The aim is to produce an operating system that is very lean but functional for PCs with 486SX-class or better processors, often with my '90s IBM ThinkPads in mind. It was based on [FLOPPINUX's build instructions](https://github.com/w84death/floppinux) and inspired by [Action Retro's demonstration of it](https://www.youtube.com/watch?v=SiHZbnFrHOY), first developed as an automated build script for achieving something similar but can be Dockerised for building on a wider range of systems, then used as the basis for an operating system with additional functionality and tailored to my usage. Whilst still small for a modern operating system, it exceeds the size of a typical floppy diskette, so it requires being written to a hard disk.
+SHORK 486 is an operating system for 486 and Pentium (P5) era vintage PCs. The aim is to produce a Linux distribution that is very lean and functional but still capable on such PCs, often with my '90s IBM ThinkPads in mind. A default SHORK 486 system aims to work with at least 16MiB system memory and take up no more than ~72MiB on the disk. Despite those constraints, the default SHORK 486 experience includes Linux kernel 7.0.0, many typical Linux commands, custom SHORK utilities such as shorkdir (TUI file browser) and shorkfetch (*fetch clone), a C compiler, an FTP, SCP and SSH client, a Git source control client, the ed, Mg (Emacs-style), nano and vi editors, basic IDE CD-ROM and DVD-ROM support, basic ISA, PCI and PCMCIA NIC support, support for most major national keyboard layouts, and a cute ASCII shark welcome screen!
 
-A default SHORK 486 system aims to work with at least 16MiB system memory and take up no more than ~72MiB on the disk. Despite those constraints, the default SHORK 486 experience includes Linux kernel 7.0.0, many typical Linux commands, custom SHORK utilities such as shorkdir (TUI file browser) and shorkfetch (*fetch clone), a C compiler, an FTP, SCP and SSH client, a Git source control client, the ed, Mg (Emacs-style), nano and vi editors, basic IDE CD-ROM and DVD-ROM support, basic ISA, PCI and PCMCIA NIC support, support for most major national keyboard layouts, and a cute ASCII shark welcome screen! A build configurator is available to alter SHORK 486 to your liking. For example, you can select the "minimal" build type that requires just 8MiB RAM and ~16MiB disk space, whilst still including most typical commands as before, some custom SHORK utilities, and the ed and vi editors. Some people have expressed support for using SHORK 486 on newer hardware for a minimalist Linux environment, and as such, build options for enabling high memory, SATA and SMP support are available if you so desire them!
+A build configurator is available to alter SHORK 486 to your liking. For example, you can select the "minimal" build type that requires just 8MiB RAM and ~16MiB disk space, whilst still including most typical commands as before, some custom SHORK utilities, and the ed and vi editors. Some people have expressed support for using SHORK 486 on newer hardware for a minimalist Linux environment, and as such, build options for enabling high memory, SATA and SMP support are available if you so desire them!
 
 <p align="center"><img alt="A photo of SHORK 486 running on an IBM ThinkPad 365ED after a cold boot" src="photos/20260223_365ed.jpg" width="512"></p>
 
 See [GALLERY](GALLERY.md) for more photos and screenshots!
+
+
+
+## Introduction
+
+### Origin & inspirations
+
+In December 2025, [Action Retro](https://www.youtube.com/@ActionRetro) posted a [video on FLOPPINUX](https://www.youtube.com/watch?v=SiHZbnFrHOY), something that turned out to be a very accessible means for me to learn how to make a working Linux system. It foremost inspired me to chase my dream of building a viable modern Linux system for my old IBM ThinkPads. SHORK Mini (as it was originally known) began as an automated build script based on [FLOPPINUX](https://github.com/w84death/floppinux)'s build instructions, but adapted for producing fixed disk images instead of diskette images. After that, more Linux kernel and BusyBox features were enabled, and other software was compiled to help fulfil that dream. Other inspirations from similar efforts include [Gray386linux](https://github.com/marmolak/gray386linux) and [Ocawesome101's blog post](https://ocawesome101.github.io/486-linux.html) on running Linux on a 486SX. Aspects of Alpine Linux and Tiny Core are also kept in mind. 
+
+### Architecture
+
+SHORK 486 is not GNU/Linux as you may be accustomed to. Its init system and most core utilities are provided by BusyBox, a single-binary application well known for embedded usage. As needed, some util-linux and individual utilities are used to fill 'holes' in BusyBox's suite. The system is compiled with musl instead of glibc, producing smaller binaries that also use fewer resources. The closest well-known Linux distribution to SHORK 486 is Alpine Linux. 
+
+### Goals
+
+Besides being something fun to try on old PCs, SHORK 486 was founded on the belief that old PCs can still be useful to the right people, retrocomputing and gaming usage aside. SHORK 486 can be useful for lightweight desktop usage, SSH terminal usage, distraction-free typewriting, embedded applications, demonstrative use in academia/education, and as a technical demonstration of what old PCs and modern software targeted at them can actually still do! If it can save just one more PC from the landfills, it has done its job! 
+
+### What's special
+
+Depending on configuration, SHORK 486 requires between just 8-24MiB system memory while still packing a lot of functionality for its size. As of 2026, support for 486 in the Linux kernel is to be removed, and 32-bit x86 in general is being dropped by various mainstream distributions. System requirements are ever-increasing - even Micro Core and Tiny Core (otherwise excellent systems) require 26-46MB RAM, putting them out of range of many early 486 systems. Thus, SHORK 486 will try to fill this niche of a ready-to-go Linux distribution for such PCs!
 
 
 
@@ -22,6 +42,8 @@ ar, arch, ascii, awk, basename, bc, beep, blkid, cal, cat, chmod, chown, chroot,
 
 ### Bundled software
 
+#### Default
+
 * emacs (text editor, [Mg](https://github.com/troglobit/mg))
 * [file](https://github.com/file/file) (file identification)
 * ftp (FTP client, [tnftp](https://ftp.netbsd.org/pub/NetBSD/misc/tnftp/))
@@ -29,7 +51,16 @@ ar, arch, ascii, awk, basename, bc, beep, blkid, cal, cat, chmod, chown, chroot,
 * [nano](https://www.nano-editor.org) (text editor)
 * scp (SCP client, [Dropbear](https://github.com/mkj/dropbear))
 * ssh (SSH client, [Dropbear](https://github.com/mkj/dropbear))
-* [tcc](https://bellard.org/tcc/) and [musl](https://musl.libc.org/) (C compiler)
+* [tcc](https://bellard.org/tcc/) with [musl](https://musl.libc.org/) (C compiler)
+
+#### Optional
+
+* [GCC with musl](https://musl.cc/)
+
+    * as (assembler)
+    * g++ (C++ compiler)
+    * gcc (C compiler)
+    * gfortran (Fortran compiler)
 
 ### SHORK Utilities (shorkutils)
 
