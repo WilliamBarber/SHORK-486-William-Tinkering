@@ -531,7 +531,7 @@ install_fedora_prerequisites()
     echo -e "${GREEN}Installing prerequisite packages for a Fedora-based system...${RESET}"
     sudo dnf -y update
 
-    PACKAGES="autoconf automake bison dialog docbook2pdf docbook2X flex gcc gettext git libtool make perl python3 syslinux-extlinux qemu-img"
+    PACKAGES="autoconf automake bison dialog docbook2pdf docbook2X flex gcc gettext git libtool make patch perl python3 syslinux-extlinux qemu-img"
 
     if $ENABLE_GUI; then
         PACKAGES+=" bdftopcf fontconfig gperf mkfontscale xorg-x11-font-utils"
