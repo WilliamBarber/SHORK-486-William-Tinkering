@@ -9,7 +9,7 @@
 <table style="table-layout: fixed; width: 100%;">
   <tr>
     <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed.jpg" style="width: 100%;" /></td>
-    <td style="width: 33%; text-align: center;"><img src="photos/20260223_365ed_shorkfetch.jpg" style="width: 100%;" /></td>
+    <td style="width: 33%; text-align: center;"><img src="photos/20260416_365ed_shorkfetch.jpg" style="width: 100%;" /></td>
   </tr>
   <tr>
     <td>First boot on IBM ThinkPad 365ED</td>
@@ -46,10 +46,21 @@
 <table style="table-layout: fixed; width: 100%;">
   <tr>
     <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorkdir/refs/heads/main/screenshots/86box_usr_bin_shork-486.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorkdir/refs/heads/main/screenshots/86box_inspect_executable_shork-486.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td>shorkdir (1)</td>
+    <td>shorkdir (2)</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorkmatrix/refs/heads/main/screenshot.png" style="width: 100%;" /></td>
     <td style="width: 50%; text-align: center;"><img src="https://raw.githubusercontent.com/SharktasticA/shorksay/refs/heads/main/screenshot.png" style="width: 100%;" /></td>
   </tr>
   <tr>
-    <td>shorkdir</td>
+    <td>shorkmatrix</td>
     <td>shorksay</td>
   </tr>
 </table>
