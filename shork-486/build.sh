@@ -103,7 +103,8 @@ KERNEL_VER="7.0"
 LIBEVENT_VER="release-2.1.12-stable"
 MG_VER="3.7"
 MUSL_VER="1.2.5"
-NANO_VER="8.7.1"
+NANO_DIST="v9"
+NANO_VER="9.0"
 NCURSES_VER="6.4"
 NEDIT_VER="NEDIT-CLASSIC-END"
 OPENSSL_VER="3.6.0"
@@ -113,8 +114,8 @@ TCC_VER="e5eedc0"
 TMUX_VER="3.6a"
 TNFTP_VER="20260211"
 TWM_VER="1.0.13.1"
-UTIL_LINUX_VER="2.41.3"
-ZLIB_VER="1.3.1.2"
+UTIL_LINUX_VER="2.42"
+ZLIB_VER="1.3.2"
 
 # MBR binary
 MBR_BIN=""
@@ -3369,7 +3370,7 @@ get_nano()
     
     NANO="nano-${NANO_VER}"
     NANO_ARC="${NANO}.tar.xz"
-    NANO_URI="https://www.nano-editor.org/dist/v8/${NANO_ARC}"
+    NANO_URI="https://www.nano-editor.org/dist/${NANO_DIST}/${NANO_ARC}"
 
     # Download source
     [ -f $NANO_ARC ] || wget $NANO_URI
