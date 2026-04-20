@@ -51,6 +51,7 @@ ENABLE_TMUX=true
 ENABLE_GCC=false
 USE_GRUB=false
 ENABLE_CFONTS=true
+ENABLE_FB=true
 ENABLE_GUI=false
 ENABLE_HIGHMEM=false
 ENABLE_KEYMAPS=true
@@ -137,6 +138,7 @@ ENABLE_TNFTP=$ENABLE_TNFTP
 ENABLE_TMUX=$ENABLE_TMUX
 USE_GRUB=$USE_GRUB
 ENABLE_CFONTS=$ENABLE_CFONTS
+ENABLE_FB=$ENABLE_FB
 ENABLE_GUI=$ENABLE_GUI
 ENABLE_HIGHMEM=$ENABLE_HIGHMEM
 ENABLE_KEYMAPS=$ENABLE_KEYMAPS
@@ -231,6 +233,7 @@ elif [ "$TYPE" == "Default" ]; then
     ENABLE_TMUX=true
     ENABLE_GCC=false
     USE_GRUB=false
+    ENABLE_FB=true
     ENABLE_GUI=false
     ENABLE_CFONTS=true
     ENABLE_HIGHMEM=false
@@ -261,6 +264,7 @@ elif [ "$TYPE" == "Minimal" ]; then
     ENABLE_TMUX=false
     ENABLE_GCC=false
     USE_GRUB=false
+    ENABLE_FB=false
     ENABLE_GUI=false
     ENABLE_CFONTS=false
     ENABLE_HIGHMEM=false
@@ -291,6 +295,7 @@ elif [ "$TYPE" == "Maximal" ]; then
     ENABLE_TMUX=true
     ENABLE_GCC=true
     USE_GRUB=false
+    ENABLE_FB=true
     ENABLE_GUI=true
     ENABLE_CFONTS=true
     ENABLE_HIGHMEM=true
@@ -308,6 +313,7 @@ elif [ "$TYPE" == "Custom" ]; then
     MAXIMAL=false
     CUSTOM=true
     ENABLE_KEYMAPS=true
+    ENABLE_FB=true
 fi
 
 

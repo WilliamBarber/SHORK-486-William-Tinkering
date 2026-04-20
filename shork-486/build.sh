@@ -158,8 +158,6 @@ FIX_EXTLINUX=false
 IS_ARCH=false
 IS_DEBIAN=false
 IS_FEDORA=false
-MAXIMAL=false
-MINIMAL=false
 PHYSICAL_ALIGN=0x2000
 PHYSICAL_START=""
 SET_KEYMAP=""
@@ -219,32 +217,20 @@ fi
 ## Parameter overrides                              ##
 ######################################################
 
-# Overrides to ensure the correct build type if not custom but one or more of the major enable parameters are used
-if [[ "$BUILD_TYPE" != "custom" ]]; then
-    if [[ "$ENABLE_GUI" == true && "$ENABLE_GCC" == true ]]; then
-        EST_MIN_RAM="24MiB + 8MiB swap"
-        BUILD_TYPE="developer + GUI"
-    elif [[ "$ENABLE_GUI" == false && "$ENABLE_GCC" == true ]]; then
-        EST_MIN_RAM="24MiB + 8MiB swap"
-        BUILD_TYPE="developer"
-    elif [[ "$ENABLE_GUI" == true && "$ENABLE_GCC" == false ]]; then
-        if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
-            EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
-        fi
-        BUILD_TYPE="GUI"
+# Overrides to ensure the correct estimated RAM requirement is shown in the after-build report
+if [ "$BUILD_TYPE" = "custom" ]; then
+    echo -e "${GREEN}Noting minimum RAM requirement for a custom build...${RESET}"
+    if [ "$ENABLE_GCC" = true ]; then
+        EST_MIN_RAM="32MiB/24MiB + 8MiB swap"
+    elif [ "$ENABLE_GUI" = true ] || [ "$ENABLE_HIGHMEM" = true ] || [ "$ENABLE_SATA" = true ]; then
+        EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
     fi
-fi
-
-# Overrides to ensure "maximal" parameter always takes precedence
-if $MAXIMAL; then
-    echo -e "${GREEN}Configuring for a maximal build...${RESET}"
-    ENABLE_FB=true
-    EST_MIN_RAM="24MiB + 8MiB swap"
-# Overrides to ensure "minimal" parameter always takes precedence (if not maximal)
-elif $MINIMAL; then
-    echo -e "${GREEN}Configuring for a minimal build...${RESET}"
-    ENABLE_FB=false
-    EST_MIN_RAM="10MiB/8MiB + 2MiB swap"
+elif [ "$BUILD_TYPE" = "maximal" ]; then
+    echo -e "${GREEN}Noting minimum RAM requirement for a maximal build...${RESET}"
+    EST_MIN_RAM="32MiB/24MiB + 8MiB swap"
+elif [ "$BUILD_TYPE" = "minimal" ]; then
+    echo -e "${GREEN}Noting minimum RAM requirement for a minimal build...${RESET}"
+    EST_MIN_RAM="8MiB"
 fi
 
 # Override to ensure the USED_WM is empty when the "use GUI" parameter is not used
@@ -4282,7 +4268,7 @@ build_disk_img()
     OVERHEAD_BYTES=$((ROOT_BYTES / 2))
     TOTAL_BYTES=$((KERNEL_BYTES + ROOT_BYTES + OVERHEAD_BYTES))
     TOTAL_MIB=$((TOTAL_BYTES / 1048576))
-    if $MINIMAL; then
+    if [ "$BUILD_TYPE" = "minimal" ]; then
         if [ "$TOTAL_MIB" -lt 16 ]; then
             TOTAL_MIB=16
         fi
@@ -4398,9 +4384,6 @@ get_installed_programs_features()
     fi
 
     if $ENABLE_HIGHMEM; then
-        if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
-            EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
-        fi
         INCLUDED_FEATURES+="\n * kernel-level high memory support"
     else
         EXCLUDED_FEATURES+="\n * kernel-level high memory support"
@@ -4437,9 +4420,6 @@ get_installed_programs_features()
     fi
 
     if $ENABLE_SATA; then
-        if [[ "$EST_MIN_RAM" != "24MiB + 8MiB swap" ]]; then
-            EST_MIN_RAM="24MiB/16MiB + 8MiB swap"
-        fi
         INCLUDED_FEATURES+="\n * kernel-level SATA support"
     else
         EXCLUDED_FEATURES+="\n * kernel-level SATA support"
