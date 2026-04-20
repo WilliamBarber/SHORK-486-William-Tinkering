@@ -613,7 +613,7 @@ get_i486_musl_cc()
     [ -d "i486-linux-musl-cross" ] || tar xvf i486-linux-musl-cross.tgz
 }
 
-# Download and compile ncurses (required for nano, htop, tic and tmux)
+# Download and compile ncurses (required for nano, htop, tic, tmux and util-linux)
 get_ncurses()
 {
     cd "$CURR_DIR/build"
@@ -647,13 +647,18 @@ get_ncurses()
         --without-debug \
         --without-cxx \
         --enable-widec \
-        --without-termlib \
-        --with-termlib=no \
-        --with-tinfo=no \
         CC="${CC_STATIC}" \
-        CFLAGS="-fPIC"
+        CFLAGS="-fPIC" \
+        CPPFLAGS="-D_XOPEN_SOURCE=600"
     make -j$(nproc)
     make install
+
+    ln -sf "${PREFIX}/include/ncursesw/curses.h" "${PREFIX}/include/curses.h"
+    ln -sf "${PREFIX}/include/ncursesw/ncurses.h" "${PREFIX}/include/ncurses.h"
+    ln -sf "${PREFIX}/include/ncursesw/panel.h" "${PREFIX}/include/panel.h"
+    ln -sf "${PREFIX}/include/ncursesw/menu.h" "${PREFIX}/include/menu.h"
+    ln -sf "${PREFIX}/include/ncursesw/form.h" "${PREFIX}/include/form.h"
+    ln -sf "${PREFIX}/include/ncursesw/term.h" "${PREFIX}/include/term.h"
 
     ln -sf "${PREFIX}/lib/libncursesw.a" "${PREFIX}/lib/libncurses.a"
     ln -sf "${PREFIX}/lib/libncursesw.a" "${PREFIX}/lib/libtinfo.a"
@@ -1018,7 +1023,30 @@ get_util_linux()
     export LIBS="-lncursesw"
 
     ./autogen.sh
-    ./configure --host=${HOST} --prefix=/usr --disable-all-programs --enable-fdisks --enable-lsblk --enable-partx --enable-whereis --enable-libblkid --enable-libfdisk --enable-libmount --enable-libsmartcols --enable-libuuid --disable-shared --enable-static --without-python --without-tinfo --disable-nls CC="${CC_STATIC}" CFLAGS="-Os -march=i486 -I${PREFIX}/include" CPPFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib -static" PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig"
+    ./configure \
+        --host=${HOST} \
+        --prefix=/usr \
+        --disable-all-programs \
+        --enable-fdisks \
+        --enable-lsblk \
+        --enable-partx \
+        --enable-whereis \
+        --enable-libblkid \
+        --enable-libfdisk \
+        --enable-libmount \
+        --enable-libsmartcols \
+        --enable-libuuid \
+        --disable-shared \
+        --enable-static \
+        --without-python \
+        --without-tinfo \
+        --disable-nls \
+        --disable-widechar \
+        CC="${CC_STATIC}" \
+        CFLAGS="-Os -march=i486 -I${PREFIX}/include" \
+        CPPFLAGS="-I${PREFIX}/include" \
+        LDFLAGS="-L${PREFIX}/lib -static" \
+        PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig"
 
     # In case "cannot find -ltinfo" error 
     for mf in Makefile libfdisk/Makefile disk-utils/Makefile misc-utils/Makefile libmount/Makefile libsmartcols/Makefile libuuid/Makefile libblkid/Makefile
